@@ -4,6 +4,10 @@ Simple ticketing system integrated with Facebook, Twitter, Dropbox...
 
 Applicaiton demonstrates usage of multiple Apache Camel EIP & Components
 
+
+### Run
+* `mvn camel:run`
+
 ### Documentation
 * [Documentation](https://www.sharelatex.com)
 * [UML Diagrams](https://www.lucidchart.com/documents)
