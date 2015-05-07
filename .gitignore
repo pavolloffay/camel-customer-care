@@ -1,4 +1,4 @@
-*.class
+﻿*.class
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -14,3 +14,11 @@ hs_err_pid*
 **/target/*
 **/.idea
 **.iml
+/target/
+
+# eclipse files
+.project
+.classpath
+.settings/
+.externalToolBuilders/
+.metadata/
