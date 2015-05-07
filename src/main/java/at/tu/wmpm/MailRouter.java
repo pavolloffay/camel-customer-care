@@ -1,5 +1,7 @@
 package at.tu.wmpm;
 
+import java.util.Map;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
@@ -32,6 +34,15 @@ public class MailRouter extends RouteBuilder {
 
                 Message in = exchange.getIn();
                 log.debug("Mail body:\n" + in.getBody(String.class) + "\n" );
+                
+                //AUTO REPLY
+                /*Map<String, Object> test=in.getHeaders();
+                for(String t:test.keySet()) {
+                	log.debug(t + " " + test.get(t).toString());
+                }*/
+                //String recipients = "&To=camel@riders.org,easy@riders.org&CC=me@you.org&BCC=someone@somewhere.org";
+                
+                //from("direct:a").to("smtp://you@mymailserver.com?password=secret&From=you@apache.org" + recipients);
             }
         });
     }
