@@ -9,26 +9,33 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Created by pavol on 8.5.2015.
- */
+ *
+ * Access token is probably valid only for short period of time
+ *      get accessToken - https://developers.facebook.com/tools/explorer/145634995501895/
+ *
+ * Facebook app - Customer Care
+ *      https://developers.facebook.com/apps/833818856683698/dashboard/
+ *
+ **/
 public class FacebookRouter extends RouteBuilder {
 
     private final Logger log = LoggerFactory.getLogger(FacebookRouter.class);
 
     private String id = "833818856683698";
     private String secret = "b26922112b372d38d597a2b870397f31";
-    private String accessToken = "CAAL2WpTCeLIBAGB8mXZAOasVUjAZBb4UTG1MmZA4bYZASZBOOzPUKBHYrJZBqoHw3yWBt2TO8K5iQJVjsUOeq2hSUSlntciN5ZBROir3AhB9t5HcKOVfwUl39e56RW8nbq1B8ltTSW5AdgGjhH8A8LNWd9USygZBQWPvZCXEREi2HOEDTcJQ2YU5WU89Q2WRoBnImtY8821NPqWtRW05Sqqwe1PpiE6dks38ZD";
-    private String accessToken2 = "CAAL2WpTCeLIBAEChiHKSmykJ7QbOcQsXK25O9vze6Ckd7Y23KMMk5ZCJGWNCwTCLkvt93bZBTzNEZBxHvdQakmbZCWWuzsdyNtkoGZCV7frpAjTpcChk8rN17PJiiNpwwc6H5TnAPLrZARJTW0oiZCpPxPTlItWmvoBBZCYmuLFlvUiSH1oGJ4YBR4gFYiKKInKpJ98wCYtZAa2JXqNwqnNSB";
+    private String accessToken = "CAACEdEose0cBANE8tV31jEJvZC8W0CUbXNNxlhG56Kv5IvpN3EwqPvcyULtZAfAwZCZBJAbQCgVkPsYqlWTmZCddWWWvgZAudVZA2wbhoncwBPPikLdZCkBwXMpnhI7XHr8hiJvu58Y6BGbSSBmKTZAmR5GJyIeqQrFQIOKU9z6eH6gVEgXR33EFsDaEmXXhNDfLDEXgkxVm7cEIhSLmvwPM8";
 
     private String userId = "109370969394044";
 
     @Override
     public void configure() throws Exception {
-        from("facebook://me?oAuthAppId=" + id + "&oAuthAppSecret=" + secret + "&oAuthAccessToken=" + accessToken2 + "&consumer.delay=1000").process(new Processor() {
+        from("facebook://getPosts?reading.since=1.1.2015&oAuthAppId=" + id + "&oAuthAppSecret=" + secret + "&oAuthAccessToken=" + accessToken).process(new Processor() {
             @Override
             public void process(Exchange exchange) throws Exception {
 
-                log.debug("\n\n\n\n FACEBOOK\n\n\n\n");
+                log.debug("\n\nFACEBOOK");
                 log.debug(ReflectionToStringBuilder.toString(exchange));
+                log.debug("\n\n");
             }
         });
     }
