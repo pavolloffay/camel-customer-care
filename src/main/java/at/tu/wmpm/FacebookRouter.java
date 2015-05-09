@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
  * Facebook app - Customer Care
  *      https://developers.facebook.com/apps/833818856683698/dashboard/
  *
+ * Facebook page - Area 51 Customer Care
+ *      https://www.facebook.com/area51customercare
+ *
  **/
 public class FacebookRouter extends RouteBuilder {
 
@@ -23,13 +26,14 @@ public class FacebookRouter extends RouteBuilder {
 
     private String id = "833818856683698";
     private String secret = "b26922112b372d38d597a2b870397f31";
-    private String accessToken = "CAACEdEose0cBANE8tV31jEJvZC8W0CUbXNNxlhG56Kv5IvpN3EwqPvcyULtZAfAwZCZBJAbQCgVkPsYqlWTmZCddWWWvgZAudVZA2wbhoncwBPPikLdZCkBwXMpnhI7XHr8hiJvu58Y6BGbSSBmKTZAmR5GJyIeqQrFQIOKU9z6eH6gVEgXR33EFsDaEmXXhNDfLDEXgkxVm7cEIhSLmvwPM8";
+    private String accessToken = "CAAL2WpTCeLIBACzMlCdqMD95lZAqZBVGzECfcnEiZBGbgorFAbsAFuzRwkW8ZAXlnAqssrztm3v7L3U6V280O8pbjP72tMP8zxCc4xEZCZAGMZBUlLL39QO81OSe6ZAobZBvOKFFBg2b5CoGDulZBJLliEJAfNhAScV55wV8yABXW5mZCPPIFKwfMacekHMaUDWvw4ZD";
 
     private String userId = "109370969394044";
+    private String pageId = "1398676863790958";
 
     @Override
     public void configure() throws Exception {
-        from("facebook://getPosts?reading.since=1.1.2015&oAuthAppId=" + id + "&oAuthAppSecret=" + secret + "&oAuthAccessToken=" + accessToken).process(new Processor() {
+        from("facebook://getTagged?reading.since=1.1.2015&userId=" + pageId + "&oAuthAppId=" + id + "&oAuthAppSecret=" + secret + "&oAuthAccessToken=" + accessToken).process(new Processor() {
             @Override
             public void process(Exchange exchange) throws Exception {
 
