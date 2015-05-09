@@ -15,7 +15,7 @@ public class MainApp {
         main.addRouteBuilder(new MailRouter());
         
         //adds FacebookRouter
-        //main.addRouteBuilder(new FacebookRouter());
+        main.addRouteBuilder(new FacebookRouter());
         
         main.run(args);
     }
