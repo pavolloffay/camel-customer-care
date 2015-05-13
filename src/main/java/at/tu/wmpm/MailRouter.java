@@ -11,6 +11,7 @@ import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.ProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class MailRouter extends RouteBuilder {
 	public void configure() throws Exception {
 
 		from(
-				"pop3s://customer.care.tu.wien@pop.gmail.com:995?password=customerCare123")
+				"pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
 				.process(new Processor() {
 					@Override
 					public void process(Exchange exchange) throws Exception {
@@ -69,9 +70,9 @@ public class MailRouter extends RouteBuilder {
 								+ "Original mail, received at "
 								+ timeStamp
 								+ "\n\n" + bodyUpdated;
-
+						camel.addComponent("properties", new PropertiesComponent("myprop.properties"));
 						template.sendBodyAndHeaders(
-								"smtps://smtp.gmail.com:465?password=customerCare123&username=customer.care.tu.wien",
+								"smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}",
 								body, headers);
 
 						log.debug("Successfully sent mail to {}",

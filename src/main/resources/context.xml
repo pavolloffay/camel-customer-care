@@ -14,4 +14,9 @@
     <camel:camelContext>
         <camel:package>at.tu.wmpm</camel:package>
     </camel:camelContext>
+    
+    <bean id="properties" class="org.apache.camel.component.properties.PropertiesComponent">
+    	<property name="location" value="classpath:myprop.properties"/>
+	</bean>
+    
 </beans>

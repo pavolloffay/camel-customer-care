@@ -12,7 +12,10 @@
     <context:component-scan base-package="at.tu.wmpm" />
     
     <camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
-    <package>org.apache.camel.example.spring</package>
-</camelContext>
+	</camelContext>
+	
+	<bean id="properties" class="org.apache.camel.component.properties.PropertiesComponent">
+    	<property name="location" value="classpath:myprop.properties"/>
+	</bean>
 
 </beans>

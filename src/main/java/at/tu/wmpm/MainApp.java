@@ -12,10 +12,10 @@ public class MainApp {
         
         
         //adds MailRouter
-        main.addRouteBuilder(new MailRouter());
+        //main.addRouteBuilder(new MailRouter());
         
         //adds FacebookRouter
-        main.addRouteBuilder(new FacebookRouter());
+       main.addRouteBuilder(new FacebookRouter());
         
         main.run(args);
     }
