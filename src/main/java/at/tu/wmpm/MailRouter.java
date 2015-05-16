@@ -17,6 +17,8 @@ import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.tu.beans.MailBean;
+
 import javax.annotation.PostConstruct;
 
 /**
@@ -77,6 +79,11 @@ public class MailRouter extends RouteBuilder {
 
 						log.debug("Successfully sent mail to {}",
 								inHeaders.get("Return-Path"));
+						/*MailBean mailsave = new MailBean();
+						mailsave.setSender(inHeaders.get("To").toString());
+						mailsave.setBody(in.getBody().toString());
+						mailsave.setSubject(inHeaders.get("Subject").toString());
+						log.debug(mailsave.toString());*/
 					}
 				});
 	}
