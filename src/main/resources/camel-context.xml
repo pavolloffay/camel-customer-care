@@ -3,6 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:camel="http://camel.apache.org/schema/spring"
+       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
@@ -14,9 +15,18 @@
     <camel:camelContext>
         <camel:package>at.tu.wmpm</camel:package>
     </camel:camelContext>
-    
+
     <bean id="properties" class="org.apache.camel.component.properties.PropertiesComponent">
-    	<property name="location" value="classpath:myprop.properties"/>
-	</bean>
-    
+        <property name="location" value="classpath:accounts.properties"/>
+    </bean>
+
+    <bean id="loggingErrorHandler" class="org.apache.camel.builder.LoggingErrorHandlerBuilder">
+        <property name="logName" value="mylogger.name"/>
+        <property name="level" value="DEBUG"/>
+    </bean>
+
+    <bean id="mongo" class="cz.jirutka.spring.embedmongo.EmbeddedMongoFactoryBean"
+          p:version="2.4.5"
+          p:bindIp="127.0.0.1"
+          p:port="12345" />
 </beans>

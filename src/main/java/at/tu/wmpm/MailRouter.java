@@ -5,6 +5,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import at.tu.beans.MailBean;
+import at.tu.wmpm.dao.IBusinessCaseDAO;
+import de.flapdoodle.embed.mongo.distribution.Version;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -16,8 +19,8 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import at.tu.beans.MailBean;
 
 import javax.annotation.PostConstruct;
 
@@ -26,65 +29,83 @@ import javax.annotation.PostConstruct;
  */
 public class MailRouter extends RouteBuilder {
 
-	private static final Logger log = LoggerFactory.getLogger(MailRouter.class);
+private static final Logger log = LoggerFactory.getLogger(MailRouter.class);
 
-	@PostConstruct
-	public void postConstruct() {
-		log.debug("Mail component initialized");
-	}
+    @Autowired
+    private IBusinessCaseDAO businessCaseDAO;
 
-	@Override
-	public void configure() throws Exception {
+    @PostConstruct
+    public void postConstruct() {
+        log.debug("Mail component initialized");
+    }
 
-		from(
-				"pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
-				.process(new Processor() {
-					@Override
-					public void process(Exchange exchange) throws Exception {
-						String timeStamp = new SimpleDateFormat(
-								"yyyy-MM-dd @ HH:mm:ss").format(Calendar
-								.getInstance().getTime());
-						CamelContext camel = new DefaultCamelContext();
-						ProducerTemplate template = camel
-								.createProducerTemplate();
-						Map<String, Object> headers = new HashMap<String, Object>();
-						Map<String, Object> inHeaders;
+    @Override
+    public void configure() throws Exception {
 
-						log.debug(ReflectionToStringBuilder.toString(exchange));
+        from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
+                .process(new Processor() {
+                    @Override
+                    public void process(Exchange exchange) throws Exception {
+                        log.debug(ReflectionToStringBuilder.toString(exchange));
 
-						Message in = exchange.getIn();
-						log.debug("Mail body:\n" + in.getBody(String.class)
-								+ "\n");
+                        Message in = exchange.getIn();
+                        String inMessageBody = in.getBody(String.class);
+                        Map<String, Object> inHeaders = in.getHeaders();
+                        log.debug("Mail body:\n" + inMessageBody + "\n");
 
-						// AUTO REPLY
-						String[] bodyLines = in.getBody(String.class).split(
-								System.getProperty("line.separator"));
-						String bodyUpdated = "";
-						for (String x : bodyLines) {
-							bodyUpdated += "> " + x + "\n";
-						}
+                        Map<String, Object> outHeaders = prepareHeaders(inHeaders);
+                        String newBody = prepareBody(in.getBody(String.class));
 
-						inHeaders = in.getHeaders();
-						headers.put("To", inHeaders.get("Return-Path"));
-						headers.put("From", inHeaders.get("To"));
-						headers.put("Subject", "We received your request");
-						String body = "Dear customer,\nWe received your mail and are currently processing the information\n\nbest regards, customer suppoprt\n\n\n"
-								+ "Original mail, received at "
-								+ timeStamp
-								+ "\n\n" + bodyUpdated;
-						camel.addComponent("properties", new PropertiesComponent("myprop.properties"));
-						template.sendBodyAndHeaders(
-								"smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}",
-								body, headers);
+                        /**
+                         * Send auto reply
+                         */
+                        CamelContext camel = new DefaultCamelContext();
+                        ProducerTemplate template = camel.createProducerTemplate();
+                        camel.addComponent("properties", new PropertiesComponent("accounts.properties"));
+//                        TODO uncomment
+//                        template.sendBodyAndHeaders(
+//                                "smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}",
+//                                newBody, outHeaders);
 
-						log.debug("Successfully sent mail to {}",
-								inHeaders.get("Return-Path"));
-						/*MailBean mailsave = new MailBean();
-						mailsave.setSender(inHeaders.get("To").toString());
-						mailsave.setBody(in.getBody().toString());
-						mailsave.setSubject(inHeaders.get("Subject").toString());
-						log.debug(mailsave.toString());*/
-					}
-				});
-	}
+                        log.debug("Successfully sent mail to {}", inHeaders.get("Return-Path"));
+
+
+                        MailBean mailToSave = new MailBean();
+                        mailToSave.setSender(inHeaders.get("To").toString());
+                        mailToSave.setBody(inMessageBody);
+                        mailToSave.setSubject(inHeaders.get("Subject").toString());
+                        businessCaseDAO.save(mailToSave);
+
+                        if (businessCaseDAO == null) {
+                            log.error("business dao is null");
+                        }
+                        for(MailBean mailBean: businessCaseDAO.findAll()) {
+                            log.debug(mailBean.toString());
+                        }
+                    }
+                });
+    }
+
+    private String prepareBody(String oldBody) {
+        String timeStamp = new SimpleDateFormat(
+                "yyyy-MM-dd @ HH:mm:ss").format(Calendar
+                .getInstance().getTime());
+
+        String body = "Dear customer,\nWe received your mail and are currently processing the information\n\nbest regards, customer suppoprt\n\n\n"
+                + "Original mail, received at "
+                + timeStamp
+                + "\n\n"
+                + oldBody.replace(System.lineSeparator(), System.lineSeparator() + " >");
+
+        return body;
+    }
+
+    private Map<String, Object> prepareHeaders(Map<String, Object> inHeaders) {
+        Map<String, Object> outHeaders = new HashMap<String, Object>();
+        outHeaders.put("To", inHeaders.get("Return-Path"));
+        outHeaders.put("From", inHeaders.get("To"));
+        outHeaders.put("Subject", "We received your request");
+
+        return outHeaders;
+    }
 }
