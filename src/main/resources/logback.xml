@@ -1,51 +1,29 @@
 <configuration>
-	<contextName>Web</contextName>
+    <contextName>CustomerCare</contextName>
 
-	<!--<if condition='isDefined("catalina.base")'> -->
-	<!--<then> -->
-	<!--<appender name="Server" class="ch.qos.logback.core.rolling.RollingFileAppender"> -->
-	<!--<file>${catalina.base}/logs/${CONTEXT_NAME}.log</file> -->
-	<!--<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"> -->
-	<!--<fileNamePattern>${catalina.base}/logs/${CONTEXT_NAME}.log.%d{yyyy-MM-dd}</fileNamePattern> -->
-	<!--</rollingPolicy> -->
-	<!--<withJansi>true</withJansi> -->
-	<!--<encoder> -->
-	<!--http://logback.qos.ch/manual/layouts.html#conversionWord -->
-	<!--<pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern> -->
-	<!--</encoder> -->
-	<!--</appender> -->
-	<!--</then> -->
-	<!--<else> -->
-	<appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
-		<withJansi>true</withJansi>
-		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} -> %msg%n
-			</pattern>
-		</encoder>
-	</appender>
-	<appender name="FILE"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>C:/logs/test.log</file>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<!-- daily rollover -->
-			<fileNamePattern>C:/logs/test.%d{yyyy-MM-dd}.log
-			</fileNamePattern>
-			<!-- keep 30 days' worth of history -->
-			<maxHistory>30</maxHistory>
-		</rollingPolicy>
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{40} -> %msg%n</pattern>
+        </encoder>
+    </appender>
 
-		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
-			</pattern>
-		</encoder>
-	</appender>
-	<!--</else> -->
-	<!--</if> -->
+    <appender name="File" class="ch.qos.logback.core.FileAppender">
+        <file>customerCare.log</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-	<!-- toto ma vacsiu prioritu ako root level -->
-	<logger name="at.tu.wmpm" level="debug" />
+    <logger name="at.tu.wmpm" level="debug" >
+    </logger>
 
-	<root level="info">
-		<appender-ref ref="Console" />
-	</root>
+    <!-- additivity: output will be sent to the appender attached higher in hierarchy -->
+    <logger name="org" level="DEBUG" additivity="false">
+        <appender-ref ref="File"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="Console" />
+    </root>
 </configuration>
