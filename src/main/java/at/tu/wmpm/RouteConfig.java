@@ -1,16 +1,17 @@
 package at.tu.wmpm;
 
-import at.tu.wmpm.filter.SpamFilter;
-import at.tu.wmpm.processor.FacebookProcessor;
-import at.tu.wmpm.processor.MailProcessor;
-import at.tu.wmpm.processor.MongoProcessor;
+import javax.annotation.PostConstruct;
+
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
-import javax.annotation.PostConstruct;
+import at.tu.wmpm.filter.SpamFilter;
+import at.tu.wmpm.processor.MailToXml;
+import at.tu.wmpm.processor.FacebookProcessor;
+import at.tu.wmpm.processor.MailProcessor;
+import at.tu.wmpm.processor.MongoProcessor;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 07.05.2015
@@ -25,6 +26,8 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
     private FacebookProcessor facebookProcessor;
     @Autowired
     private MongoProcessor mongoProcessor;
+    @Autowired
+    private MailToXml mailTranslator;
 
     @PostConstruct
     public void postConstruct() {
@@ -35,6 +38,7 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
     public void configure() throws Exception {
 
         from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
+                .process(mailTranslator)
                 .process(mailProcessor)
                 .choice()
                     .when().method(SpamFilter.class, "isSpam")
