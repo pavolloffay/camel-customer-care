@@ -1,7 +1,9 @@
 package at.tu.wmpm;
 
+import at.tu.wmpm.filter.SpamFilter;
 import at.tu.wmpm.processor.FacebookProcessor;
 import at.tu.wmpm.processor.MailProcessor;
+import at.tu.wmpm.processor.MongoProcessor;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,8 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
     private MailProcessor mailProcessor;
     @Autowired
     private FacebookProcessor facebookProcessor;
+    @Autowired
+    private MongoProcessor mongoProcessor;
 
     @PostConstruct
     public void postConstruct() {
@@ -29,11 +33,20 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
 
     @Override
     public void configure() throws Exception {
+
         from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
-                .filter().method(SpamFilter.class, "isNotSpam")
-            .process(mailProcessor)
-                .to("velocity:mail-templates/auto-reply.vm")
-                .to("smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}");
+                .process(mailProcessor)
+                .choice()
+                    .when().method(SpamFilter.class, "isSpam")
+                        .stop()
+                    .when(header("Subject").contains("ID"))
+                        .to("direct:fetchMongo")
+                    .otherwise()
+                        .to("velocity:mail-templates/auto-reply.vm")
+                        .to("smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}")
+                        .to("direct:fetchMongo");
+
+        from("direct:fetchMongo").process(mongoProcessor);
 
 
         from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")

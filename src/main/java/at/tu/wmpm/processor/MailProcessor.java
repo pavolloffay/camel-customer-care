@@ -1,6 +1,5 @@
 package at.tu.wmpm.processor;
 
-import at.tu.wmpm.dao.IBusinessCaseDAO;
 import at.tu.wmpm.model.MailBusinessCase;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -10,9 +9,9 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -26,8 +25,9 @@ public class MailProcessor implements Processor {
 
     private final Logger log = LoggerFactory.getLogger(MailProcessor.class);
 
-    @Autowired
-    private IBusinessCaseDAO businessCaseDAO;
+    static {
+        System.setProperty("mail.mime.multipart.ignoreexistingboundaryparameter", "true");
+    }
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -38,18 +38,17 @@ public class MailProcessor implements Processor {
         Map<String, Object> inHeaders = in.getHeaders();
         log.debug("\n\nMail body:\n" + inMessageBody + "\n");
 
-
-        MailBusinessCase mailToSave = new MailBusinessCase();
-        mailToSave.setSender(inHeaders.get("To").toString());
-        mailToSave.setBody(inMessageBody);
-        mailToSave.setSubject(inHeaders.get("Subject").toString());
-        businessCaseDAO.save(mailToSave);
-        for(MailBusinessCase mailBusinessCase: businessCaseDAO.findAll()) {
-            log.debug(mailBusinessCase.toString());
-        }
+        /**
+         * Set new Business case to exchange message
+         */
+        MailBusinessCase mailBusinessCase = new MailBusinessCase();
+        mailBusinessCase.setSender(inHeaders.get("To").toString());
+        mailBusinessCase.setBody(inMessageBody);
+        mailBusinessCase.setSubject(inHeaders.get("Subject").toString());
 
         Map<String, Object> outHeaders = prepareOutHeaders(inHeaders);
         Message message = new DefaultMessage();
+        message.setBody(mailBusinessCase);
         message.setHeaders(outHeaders);
         message.setHeader("CamelVelocityContext", getVelocityContext(inMessageBody));
         exchange.setOut(message);
