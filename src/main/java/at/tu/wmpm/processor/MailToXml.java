@@ -52,7 +52,7 @@ public class MailToXml implements Processor {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         DOMSource source = new DOMSource(doc);
-        StreamResult result = new StreamResult(new File(in.getHeaders().get("Subject_").toString()+""+new SimpleDateFormat("ddMMyyyy_HH-mm").format(new Date())+".xml"));
+        StreamResult result = new StreamResult(new File(in.getHeaders().get("Subject").toString()+""+new SimpleDateFormat("ddMMyyyy_HH-mm").format(new Date())+".xml"));
 
 
         transformer.transform(source, result);
