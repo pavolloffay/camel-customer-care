@@ -30,7 +30,10 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
     @Override
     public void configure() throws Exception {
         from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
-            .process(mailProcessor);
+            .process(mailProcessor)
+                .to("velocity:mail-templates/auto-reply.vm")
+                .to("smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}");
+
 
         from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
             .process(facebookProcessor);
