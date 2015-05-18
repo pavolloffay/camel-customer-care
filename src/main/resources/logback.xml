@@ -15,15 +15,26 @@
         </encoder>
     </appender>
 
-    <logger name="at.tu.wmpm" level="debug" >
+    <appender name="SpamEmails" class="ch.qos.logback.core.FileAppender">
+        <file>spamEmails.log</file>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="at.tu.wmpm.SpamFilter" level="debug">
+        <appender-ref ref="SpamEmails"/>
+    </logger>
+
+    <logger name="at.tu.wmpm" level="debug">
     </logger>
 
     <!-- additivity: output will be sent to the appender attached higher in hierarchy -->
-    <logger name="org" level="DEBUG" additivity="false">
+    <logger name="org" level="debug" additivity="false">
         <appender-ref ref="File"/>
     </logger>
 
-    <root level="INFO">
+    <root level="info">
         <appender-ref ref="Console" />
     </root>
 </configuration>

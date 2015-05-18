@@ -30,6 +30,7 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
     @Override
     public void configure() throws Exception {
         from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
+                .filter().method(SpamFilter.class, "isNotSpam")
             .process(mailProcessor)
                 .to("velocity:mail-templates/auto-reply.vm")
                 .to("smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}");
