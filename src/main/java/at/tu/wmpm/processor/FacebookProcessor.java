@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class FacebookProcessor implements Processor {
 
-    private final Logger log = LoggerFactory.getLogger(FacebookProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(FacebookProcessor.class);
 
     @Override
     public void process(Exchange exchange) throws Exception {

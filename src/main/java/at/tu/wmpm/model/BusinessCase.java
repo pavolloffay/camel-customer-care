@@ -12,8 +12,18 @@ public abstract class BusinessCase {
     private String id;
     private String subject;
     private String body;
-    private Long parentId;
+    private String parentId;
     private String sender;
+    private boolean isNew;
+
+    @JsonIgnore
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setNew(boolean isNew) {
+        this.isNew = isNew;
+    }
 
     public String getSubject() {
         return subject;
@@ -32,12 +42,12 @@ public abstract class BusinessCase {
     }
 
     @JsonProperty("parent_id")
-    public Long getParentId() {
+    public String getParentId() {
         return parentId;
     }
 
     @JsonProperty("parent_id")
-    public void setParentId(Long parentId) {
+    public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 

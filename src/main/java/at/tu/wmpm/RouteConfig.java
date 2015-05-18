@@ -1,9 +1,8 @@
 package at.tu.wmpm;
 
 import at.tu.wmpm.filter.SpamFilter;
-import at.tu.wmpm.processor.FacebookProcessor;
-import at.tu.wmpm.processor.MailProcessor;
-import at.tu.wmpm.processor.MongoProcessor;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ import javax.annotation.PostConstruct;
  */
 public class RouteConfig extends RouteBuilder {
 
-private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
+    private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
 
     @Autowired
     private MailProcessor mailProcessor;
@@ -25,6 +24,10 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
     private FacebookProcessor facebookProcessor;
     @Autowired
     private MongoProcessor mongoProcessor;
+    @Autowired
+    private AutoReplyHeadersProcessor autoReplyHeadersProcessor;
+    @Autowired
+    private CalendarProcessor calendarProcessor;
 
     @PostConstruct
     public void postConstruct() {
@@ -36,20 +39,37 @@ private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
 
         from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
                 .process(mailProcessor)
+                .to("direct:spamChecking");
+
+        from("direct:spamChecking")
+                .filter().method(SpamFilter.class, "isNoSpam")
+//                store to DB, load parent
+                .process(mongoProcessor)
                 .choice()
-                    .when().method(SpamFilter.class, "isSpam")
-                        .stop()
-                    .when(header("Subject").contains("ID"))
-                        .to("direct:fetchMongo")
+                    .when(body(BusinessCase.class).method("isNew").isEqualTo(true)).setHeader("Subject", body(BusinessCase.class).method("getId"))
+                        .multicast().parallelProcessing().to("direct:autoReplyEmail", "direct:addToCalendar").endChoice()
                     .otherwise()
-                        .to("velocity:mail-templates/auto-reply.vm")
-                        .to("smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}")
-                        .to("direct:fetchMongo");
+                        .to("direct:addToCalendar");
 
-        from("direct:fetchMongo").process(mongoProcessor);
+        from("direct:autoReplyEmail").process(autoReplyHeadersProcessor)
+                .to("velocity:mail-templates/auto-reply.vm")
+                .to("smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}");
 
+
+        /**
+         * add calendar events for employees
+         * forward event for employees
+         */
+        from("direct:addToCalendar").process(calendarProcessor); //.to("direct:careCenter")
+
+        /**
+         * process for care center employees
+         * from(direct:careCenter).().(send email)
+         */
 
         from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
-            .process(facebookProcessor);
+                .process(facebookProcessor);
+//        we could perform spam checking and then distinguish multiple paths for beans see body().isInstanceOf()
+//            .to("direct:spam");
     }
 }

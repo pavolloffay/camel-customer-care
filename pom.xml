@@ -30,6 +30,21 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.6.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>.</directory>
+                            <includes>
+                                <include>**/*.log</include>
+                            </includes>
+                            <followSymlinks>false</followSymlinks>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.camel</groupId>
@@ -96,6 +111,17 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-mongodb</artifactId>
             <version>${camel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-google-calendar</artifactId>
+            <version>${camel.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jackson-core</artifactId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- MongoDB -->

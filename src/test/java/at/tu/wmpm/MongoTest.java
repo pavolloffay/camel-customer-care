@@ -1,5 +1,7 @@
 package at.tu.wmpm;
 
+import at.tu.wmpm.dao.IBusinessCaseDAO;
+import at.tu.wmpm.model.MailBusinessCase;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.Mongo;
@@ -26,6 +28,8 @@ public class MongoTest {
 
     @Autowired
     private Mongo mongo;
+    @Autowired
+    private IBusinessCaseDAO businessCaseDAO;
 
     @Test
     public void mongoSetupTest() throws UnknownHostException {
@@ -37,5 +41,21 @@ public class MongoTest {
         DB db = mongo.getDB("DSA");
         DBCollection collection = db.getCollection("ADASD");
         collection.drop();
+    }
+
+
+    @Test
+    public void testSave() {
+        MailBusinessCase mailBusinessCase = new MailBusinessCase();
+        mailBusinessCase.setBody("das");
+        mailBusinessCase.setSender("dsa");
+
+        businessCaseDAO.save(mailBusinessCase);
+
+        MailBusinessCase mailBusinessCase1 = new MailBusinessCase();
+        mailBusinessCase1.setBody("rrr");
+        mailBusinessCase1.setSender("rrr");
+
+        businessCaseDAO.save(mailBusinessCase1);
     }
 }

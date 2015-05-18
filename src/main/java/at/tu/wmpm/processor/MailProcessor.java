@@ -6,16 +6,13 @@ import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultMessage;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by pavol on 18.5.2015.
@@ -23,56 +20,38 @@ import java.util.Map;
 @Service
 public class MailProcessor implements Processor {
 
-    private final Logger log = LoggerFactory.getLogger(MailProcessor.class);
-
-    static {
-        System.setProperty("mail.mime.multipart.ignoreexistingboundaryparameter", "true");
-    }
+    private static final Logger log = LoggerFactory.getLogger(MailProcessor.class);
+    private static final Pattern ID_PATTERN = Pattern.compile("(ID:)([a-zA-Z0-9]{3,})");
 
     @Override
     public void process(Exchange exchange) throws Exception {
         log.debug(ReflectionToStringBuilder.toString(exchange));
 
         Message in = exchange.getIn();
-        String inMessageBody = in.getBody(String.class);
         Map<String, Object> inHeaders = in.getHeaders();
+        String inMessageBody = in.getBody(String.class);
+        String subject = inHeaders.get("Subject").toString();
         log.debug("\n\nMail body:\n" + inMessageBody + "\n");
 
         /**
          * Set new Business case to exchange message
          */
         MailBusinessCase mailBusinessCase = new MailBusinessCase();
-        mailBusinessCase.setSender(inHeaders.get("To").toString());
+        mailBusinessCase.setSender(inHeaders.get("Return-Path").toString());
         mailBusinessCase.setBody(inMessageBody);
-        mailBusinessCase.setSubject(inHeaders.get("Subject").toString());
+        mailBusinessCase.setSubject(subject);
+        mailBusinessCase.setNew(true);
 
-        Map<String, Object> outHeaders = prepareOutHeaders(inHeaders);
+        Matcher matcher = ID_PATTERN.matcher(subject);
+        String parentId = null;
+        if (matcher.find()) {
+            parentId = matcher.group(2);
+            mailBusinessCase.setNew(false);
+        }
+        mailBusinessCase.setParentId(parentId);
+
         Message message = new DefaultMessage();
         message.setBody(mailBusinessCase);
-        message.setHeaders(outHeaders);
-        message.setHeader("CamelVelocityContext", getVelocityContext(inMessageBody));
         exchange.setOut(message);
-    }
-
-    private Map<String, Object> prepareOutHeaders(Map<String, Object> inHeaders) {
-        Map<String, Object> outHeaders = new HashMap<String, Object>();
-        outHeaders.put("To", inHeaders.get("Return-Path"));
-        outHeaders.put("From", inHeaders.get("To"));
-        outHeaders.put("Subject", "We received your request");
-
-        return outHeaders;
-    }
-
-    private VelocityContext getVelocityContext(String oldBody) {
-        String timeStamp = new SimpleDateFormat("yyyy-MM-dd @ HH:mm:ss").format(Calendar
-                .getInstance().getTime());
-        oldBody = System.lineSeparator() + oldBody;
-        oldBody = oldBody.replace(System.lineSeparator(), System.lineSeparator() + " >");
-
-        Map<String, Object> velocityParams = new HashMap<>();
-        velocityParams.put("timeStamp", timeStamp);
-        velocityParams.put("oldBody", oldBody);
-
-        return new VelocityContext(velocityParams);
     }
 }

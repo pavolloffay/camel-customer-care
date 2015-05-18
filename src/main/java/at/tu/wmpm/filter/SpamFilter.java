@@ -1,5 +1,6 @@
 package at.tu.wmpm.filter;
 
+import at.tu.wmpm.model.BusinessCase;
 import at.tu.wmpm.model.MailBusinessCase;
 import org.apache.camel.Body;
 import org.apache.camel.Header;
@@ -11,16 +12,16 @@ import org.slf4j.LoggerFactory;
  */
 public class SpamFilter {
 
-    public static final Logger log = LoggerFactory.getLogger(SpamFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(SpamFilter.class);
 
 
-    public static boolean isSpam(@Body MailBusinessCase body, @Header("Return-Path") String from) {
+    public static boolean isNoSpam(@Body BusinessCase body, @Header("Return-Path") String from) {
 
-        if (body.getBody().equals("spam")) {
+        if (body.getBody().contains("spam")) {
             log.info("spam from:{}, body:\n{}", from, body);
-            return true;
+            return false;
         }
 
-        return false;
+        return true;
     }
 }
