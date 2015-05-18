@@ -1,6 +1,6 @@
-package at.tu.beans;
+package at.tu.wmpm.model;
 
-public class TwitterBean extends BasicBean {
+public class TwitterBusinessCase extends BusinessCase {
 
 	//maybe some specific implementations or fields which are saved for tweets
 	

@@ -1,6 +1,6 @@
 package at.tu.wmpm.dao;
 
-import at.tu.beans.MailBean;
+import at.tu.wmpm.model.MailBusinessCase;
 
 import java.util.List;
 
@@ -8,9 +8,9 @@ import java.util.List;
  * Created by pavol on 17.5.2015.
  */
 public interface IBusinessCaseDAO {
-    void save(MailBean mailBean);
+    void save(MailBusinessCase mailBean);
     void remove(String id);
 
-    List<MailBean> findAll();
-    MailBean findById(String id);
+    List<MailBusinessCase> findAll();
+    MailBusinessCase findById(String id);
 }

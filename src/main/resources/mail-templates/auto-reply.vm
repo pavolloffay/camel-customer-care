@@ -1,0 +1,8 @@
+Dear customer,
+we received your mail and are currently processing the information.
+
+Best regards, customer suppopr
+
+Original mail, received at ${timeStamp}
+
+${oldBody}

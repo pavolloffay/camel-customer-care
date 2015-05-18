@@ -2,23 +2,23 @@ package at.tu.wmpm;
 
 import org.apache.camel.spring.Main;
 
+import java.util.Collections;
 
 /**
- * main class doesn't work because spring beans are injected to MailRouter so every class
- * mas to be managed by DI container
+ * App used to run from IDE,
+ * from command line use mvn camel:run
  */
 public class MainApp {
 
-    public static void main(String... args) throws Exception {
+    public static void main(String[] args) throws Exception {
         Main main = new Main();
+        main.setFileApplicationContextUri("classpath*:camel-context.xml");
         main.enableHangupSupport();
 
-        //adds MailRouter
-        main.addRouteBuilder(new MailRouter());
-        
-        //adds FacebookRouter
-        main.addRouteBuilder(new FacebookRouter());
-        
-        main.run(args);
+        /**
+         * Run - all configuration is done in camel-context.xml
+         * not passing arguments
+         */
+        main.run(Collections.emptyList().toArray(new String[0]));
     }
 }

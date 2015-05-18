@@ -21,7 +21,7 @@ import static org.hamcrest.core.Is.is;
  * Created by pavol on 17.5.2015.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:/META-INF/spring/context.xml"})
+@ContextConfiguration(locations = {"classpath:/META-INF/spring/a.xml"})
 public class MongoTest {
 
     @Autowired

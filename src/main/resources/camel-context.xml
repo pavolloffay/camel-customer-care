@@ -12,18 +12,13 @@
     <context:annotation-config />
     <context:component-scan base-package="at.tu.wmpm" />
 
-    <camel:camelContext>
-        <camel:package>at.tu.wmpm</camel:package>
-    </camel:camelContext>
-
     <bean id="properties" class="org.apache.camel.component.properties.PropertiesComponent">
         <property name="location" value="classpath:accounts.properties"/>
     </bean>
 
-    <bean id="loggingErrorHandler" class="org.apache.camel.builder.LoggingErrorHandlerBuilder">
-        <property name="logName" value="mylogger.name"/>
-        <property name="level" value="DEBUG"/>
-    </bean>
+    <camel:camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">
+        <package>at.tu.wmpm</package>
+    </camel:camelContext>
 
     <bean id="mongo" class="cz.jirutka.spring.embedmongo.EmbeddedMongoFactoryBean"
           p:version="2.4.5"

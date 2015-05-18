@@ -1,6 +1,6 @@
-package at.tu.beans;
+package at.tu.wmpm.model;
 
-public class FacebookBean extends BasicBean {
+public class FacebookBusinessCase extends BusinessCase {
 
 	//maybe some specific implementations or fields which are saved for facebook messages
 	

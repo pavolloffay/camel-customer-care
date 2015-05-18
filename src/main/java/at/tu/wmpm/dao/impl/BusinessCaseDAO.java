@@ -1,11 +1,10 @@
 package at.tu.wmpm.dao.impl;
 
-import at.tu.beans.MailBean;
+import at.tu.wmpm.model.MailBusinessCase;
 import at.tu.wmpm.dao.IBusinessCaseDAO;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.Mongo;
-import com.mongodb.MongoClient;
 import org.mongojack.*;
 import org.mongojack.WriteResult;
 import org.slf4j.Logger;
@@ -35,7 +34,7 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
 
     private DB db;
     private DBCollection dbCollection;
-    private JacksonDBCollection<MailBean, String> jacksonDBCollection;
+    private JacksonDBCollection<MailBusinessCase, String> jacksonDBCollection;
 
 //    private MongoClient mongoClient;
 //    private MongoDatabase mongoDatabase;
@@ -51,7 +50,7 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
         }
         db = mongo.getDB(DB_NAME);
         dbCollection = db.getCollection(COLLECTION_NAME);
-        jacksonDBCollection = JacksonDBCollection.wrap(dbCollection, MailBean.class, String.class);
+        jacksonDBCollection = JacksonDBCollection.wrap(dbCollection, MailBusinessCase.class, String.class);
 
 //        mongoClient = embeddedMongoFactoryBean.getObject();
 //        mongoDatabase = mongoClient.getDatabase(DB_NAME);
@@ -59,10 +58,10 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
     }
 
     @Override
-    public void save(MailBean mailBean) {
-        log.debug("Saving mail {}", mailBean);
-        WriteResult<MailBean, String> result = jacksonDBCollection.insert(mailBean);
-        mailBean.setId(result.getSavedId());
+    public void save(MailBusinessCase MailBusinessCase) {
+        log.debug("Saving mail {}", MailBusinessCase);
+        WriteResult<MailBusinessCase, String> result = jacksonDBCollection.insert(MailBusinessCase);
+        MailBusinessCase.setId(result.getSavedId());
     }
 
     @Override
@@ -71,22 +70,22 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
     }
 
     @Override
-    public List<MailBean> findAll() {
+    public List<MailBusinessCase> findAll() {
         return cursorToList(jacksonDBCollection.find());
     }
 
     @Override
-    public MailBean findById(String id) {
+    public MailBusinessCase findById(String id) {
         return jacksonDBCollection.findOneById(id);
     }
 
-    private List<MailBean> cursorToList(org.mongojack.DBCursor<MailBean> dbCursor) {
-        List<MailBean> mailBeans = new ArrayList<>();
+    private List<MailBusinessCase> cursorToList(org.mongojack.DBCursor<MailBusinessCase> dbCursor) {
+        List<MailBusinessCase> MailBusinessCases = new ArrayList<>();
         while (dbCursor.hasNext()) {
-            MailBean mailBean = dbCursor.next();
-            mailBeans.add(mailBean);
+            MailBusinessCase MailBusinessCase = dbCursor.next();
+            MailBusinessCases.add(MailBusinessCase);
         }
 
-        return mailBeans;
+        return MailBusinessCases;
     }
 }

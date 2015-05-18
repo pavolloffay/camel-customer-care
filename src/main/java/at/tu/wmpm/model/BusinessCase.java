@@ -1,11 +1,11 @@
-package at.tu.beans;
+package at.tu.wmpm.model;
 
 
 import com.fasterxml.jackson.annotation.*;
 import org.mongojack.ObjectId;
 
 
-public abstract class BasicBean {
+public abstract class BusinessCase {
 
     @ObjectId
     @JsonProperty("_id")
