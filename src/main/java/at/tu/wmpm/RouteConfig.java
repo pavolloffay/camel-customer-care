@@ -1,13 +1,17 @@
 package at.tu.wmpm;
 
-import at.tu.wmpm.filter.SpamFilter;
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.*;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import at.tu.wmpm.filter.SpamFilter;
+import at.tu.wmpm.processor.MailToXml;
+import at.tu.wmpm.processor.FacebookProcessor;
+import at.tu.wmpm.processor.MailProcessor;
+import at.tu.wmpm.processor.MongoProcessor;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.*;
 
 import javax.annotation.PostConstruct;
 
@@ -28,6 +32,8 @@ public class RouteConfig extends RouteBuilder {
     private AutoReplyHeadersProcessor autoReplyHeadersProcessor;
     @Autowired
     private CalendarProcessor calendarProcessor;
+    @Autowired
+    private MailToXml mailTranslator;
 
     @PostConstruct
     public void postConstruct() {
@@ -38,6 +44,7 @@ public class RouteConfig extends RouteBuilder {
     public void configure() throws Exception {
 
         from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
+                .process(mailTranslator)
                 .process(mailProcessor)
                 .to("direct:spamChecking");
 
