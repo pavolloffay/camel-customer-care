@@ -55,33 +55,28 @@ public class RouteConfig extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 
-	// Exception handling
-		onException(MailException.class)
-				.continued(true)
-				.process(wiretapMail)
-				.to("direct:logMailException");
-		
-		onException(FacebookException.class)
-				.continued(true)
-				.process(wiretapFacebook)
-				.to("direct:logFacebookException");
-		
-		onException(TwitterException.class)
-				.continued(true)
-				.process(wiretapTwitter)
-				.to("direct:logTwitterException");
+		// Exception handling
 
-		from("direct:logMailException")
-				.to("file:logs/exceptions/logMail");
-		
-		from("direct:logFacebookException")
-				.to("file:logs/exceptions/logFacebook");
-		
+		// .process(wiretapMail)
+		onException(MailException.class).continued(true).to(
+				"direct:logMailException");
+
+		onException(FacebookException.class).continued(true).to(
+				"direct:logFacebookException");
+
+		onException(TwitterException.class).continued(true).to(
+				"direct:logTwitterException");
+
+		from("direct:logMailException").to("file:logs/exceptions/logMail");
+
+		from("direct:logFacebookException").to(
+				"file:logs/exceptions/logFacebook");
+
 		from("direct:logTwitterException")
 				.to("file:logs/exceptions/logTwitter");
 
-	// Route Construction	
-		
+		// Route Construction
+
 		/**
 		 * E-Mail Channel
 		 */
@@ -89,9 +84,8 @@ public class RouteConfig extends RouteBuilder {
 				"pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
 				.wireTap("direct:logMail", wiretapMail)
 				.process(mailTranslator)
-				.process(mailProcessor)
-				.to("direct:spamChecking");
-	
+				.process(mailProcessor).to("direct:spamChecking");
+
 		from("direct:logMail").to("file:logs/wiretap-logs/logMail");
 
 		from("direct:spamChecking")
@@ -126,13 +120,13 @@ public class RouteConfig extends RouteBuilder {
 		 */
 		from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}")
 				// from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
-				.process(facebookProcessor)
 				.wireTap("direct:logFacebook", wiretapFacebook)
+				.process(facebookProcessor)
 				.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
 		// we could perform spam checking and then distinguish multiple paths
 		// for beans see body().isInstanceOf()
 		// .to("direct:spam");
-		
+
 		from("direct:logFacebook").to("file:logs/wiretap-logs/logFacebook");
 
 		/**
