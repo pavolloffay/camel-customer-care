@@ -1,11 +1,8 @@
 package at.tu.wmpm.model;
 
-
 import java.util.ArrayList;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 
 import org.mongojack.ObjectId;
 
@@ -13,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @XmlRootElement
-@XmlType
+@XmlAccessorType(XmlAccessType.FIELD)
 public abstract class BusinessCase {
 
     @ObjectId
@@ -21,12 +18,13 @@ public abstract class BusinessCase {
     private String id;
     private String subject;
     private String body;
+    @JsonProperty("parent_id")
     private String parentId;
     private String sender;
+    @JsonIgnore
     private boolean isNew;
     private ArrayList<Comment> comments;
 
-    @JsonIgnore
     public boolean isNew() {
         return isNew;
     }
@@ -35,7 +33,6 @@ public abstract class BusinessCase {
         this.isNew = isNew;
     }
 
-    @XmlElement
     public String getSubject() {
         return subject;
     }
@@ -44,7 +41,6 @@ public abstract class BusinessCase {
         this.subject = subject;
     }
 
-    @XmlElement
     public String getBody() {
         return body;
     }
@@ -53,18 +49,14 @@ public abstract class BusinessCase {
         this.body = body;
     }
 
-    @XmlElement
-    @JsonProperty("parent_id")
     public String getParentId() {
         return parentId;
     }
 
-    @JsonProperty("parent_id")
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
 
-    @XmlElement
     public String getSender() {
         return sender;
     }
@@ -73,7 +65,6 @@ public abstract class BusinessCase {
         this.sender = sender;
     }
 
-    @XmlElement
     public final String getId() {
         return id;
     }

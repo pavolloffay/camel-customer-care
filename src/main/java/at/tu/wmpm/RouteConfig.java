@@ -53,8 +53,6 @@ public class RouteConfig extends RouteBuilder {
     @Autowired
     private CalendarProcessor calendarProcessor;
     @Autowired
-    private MailToXml mailTranslator;
-    @Autowired
     private WireTapLogMail wiretapMail;
     @Autowired
     private WireTapLogFacebook wiretapFacebook;
@@ -67,7 +65,7 @@ public class RouteConfig extends RouteBuilder {
         DROPBOX__AUTH_PARAMETERS = "accessToken=" + DROPBOX_ACCESS_TOKEN + "&clientIdentifier=" +  DROPBOX_CLIENT_IDENTIFIER;
     }
 
-    @SuppressWarnings({ "deprecation" })
+    @SuppressWarnings({"deprecation"})
     @Override
     public void configure() throws Exception {
 
@@ -76,20 +74,16 @@ public class RouteConfig extends RouteBuilder {
         String filename = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss").format(new Date())+".xml";
 
         // Exception handling
-        onException(MailException.class).continued(true).to(
-                "direct:logMailException");
-
-        onException(FacebookException.class).continued(true).to(
-                "direct:logFacebookException");
-
-        onException(TwitterException.class).continued(true).to(
-                "direct:logTwitterException");
-
-        from("direct:logMailException").to("file:logs/exceptions/logMail");
-
-        from("direct:logFacebookException").to(
-                "file:logs/exceptions/logFacebook");
-
+        onException(MailException.class).continued(true)
+                .to("direct:logMailException"); //TODO directly .to(file:logs/excp/logMail) ??
+        onException(FacebookException.class).continued(true)
+                .to("direct:logFacebookException");
+        onException(TwitterException.class).continued(true)
+                .to("direct:logTwitterException");
+        from("direct:logMailException")
+                .to("file:logs/exceptions/logMail");
+        from("direct:logFacebookException")
+                .to("file:logs/exceptions/logFacebook");
         from("direct:logTwitterException")
                 .to("file:logs/exceptions/logTwitter");
 
@@ -130,8 +124,9 @@ public class RouteConfig extends RouteBuilder {
         /**
          * add calendar events for employees forward event for employees
          */
-        // from("direct:addToCalendar").process(calendarProcessor).to("google-calendar://list/list");
-        // //.to("direct:careCenter")
+        from("direct:addToCalendar")
+                .process(calendarProcessor);
+        // //.to("google-calendar:createNewEvent")
 
         /**
          * process for care center employees from(direct:careCenter).to(smtp send email)
