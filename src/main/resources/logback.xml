@@ -22,6 +22,7 @@
         </encoder>
     </appender>
 
+
     <logger name="at.tu.wmpm.filter.SpamFilter" level="debug">
         <appender-ref ref="SpamEmails"/>
     </logger>
