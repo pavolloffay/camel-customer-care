@@ -1,6 +1,14 @@
 package at.tu.wmpm;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBContext;
+
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +17,16 @@ import at.tu.wmpm.exception.FacebookException;
 import at.tu.wmpm.exception.MailException;
 import at.tu.wmpm.exception.TwitterException;
 import at.tu.wmpm.filter.SpamFilter;
-import at.tu.wmpm.processor.MailToXml;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
+import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.FacebookProcessor;
 import at.tu.wmpm.processor.MailProcessor;
+import at.tu.wmpm.processor.MailToXml;
 import at.tu.wmpm.processor.MongoProcessor;
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.*;
-
-import javax.annotation.PostConstruct;
+import at.tu.wmpm.processor.WireTapLogFacebook;
+import at.tu.wmpm.processor.WireTapLogMail;
+import at.tu.wmpm.processor.WireTapLogTwitter;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015
@@ -54,6 +64,10 @@ public class RouteConfig extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 
+		JAXBContext jaxbContext = JAXBContext.newInstance(BusinessCase.class);
+    	JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
+    	String filename = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss").format(new Date())+".xml";
+
 		// Exception handling
 
 		// .process(wiretapMail)
@@ -82,8 +96,10 @@ public class RouteConfig extends RouteBuilder {
 		from(
 				"pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
 				.wireTap("direct:logMail", wiretapMail)
-				.process(mailTranslator)
+				//.process(mailTranslator)
 				.process(mailProcessor)
+				.marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant(filename)).to("file:XMLExports?autoCreate=true")
+				//.to("dropbox://put?accessToken={{DBAccessToken}}&clientIdentifier={{DBClientIdentifier}}&uploadMode=add&localPath=XMLExports&remotePath=/root/XMLExports")
 				.to("direct:spamChecking");
 
 		from("direct:logMail").to("file:logs/wiretap-logs/logMail");

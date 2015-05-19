@@ -2,13 +2,18 @@ package at.tu.wmpm.model;
 
 
 import java.util.ArrayList;
-import java.util.Date;
 
-import com.fasterxml.jackson.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import org.mongojack.ObjectId;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@XmlRootElement
+@XmlType
 public abstract class BusinessCase {
 
     @ObjectId
@@ -30,6 +35,7 @@ public abstract class BusinessCase {
         this.isNew = isNew;
     }
 
+    @XmlElement
     public String getSubject() {
         return subject;
     }
@@ -38,6 +44,7 @@ public abstract class BusinessCase {
         this.subject = subject;
     }
 
+    @XmlElement
     public String getBody() {
         return body;
     }
@@ -46,6 +53,7 @@ public abstract class BusinessCase {
         this.body = body;
     }
 
+    @XmlElement
     @JsonProperty("parent_id")
     public String getParentId() {
         return parentId;
@@ -56,6 +64,7 @@ public abstract class BusinessCase {
         this.parentId = parentId;
     }
 
+    @XmlElement
     public String getSender() {
         return sender;
     }
@@ -64,6 +73,7 @@ public abstract class BusinessCase {
         this.sender = sender;
     }
 
+    @XmlElement
     public final String getId() {
         return id;
     }
@@ -71,7 +81,7 @@ public abstract class BusinessCase {
     public final void setId(String id) {
         this.id = id;
     }
-    
+
     public ArrayList<Comment> getComments() {
 		return comments;
 	}
@@ -79,7 +89,7 @@ public abstract class BusinessCase {
 	public void setComments(ArrayList<Comment> comments) {
 		this.comments = comments;
 	}
-	
+
 	public void addComment(Comment comment){
 		this.comments.add(comment);
 	}
