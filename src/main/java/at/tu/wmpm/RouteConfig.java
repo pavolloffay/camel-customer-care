@@ -6,6 +6,7 @@ import java.util.Date;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.slf4j.Logger;
@@ -75,8 +76,6 @@ public class RouteConfig extends RouteBuilder {
         String filename = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss").format(new Date())+".xml";
 
         // Exception handling
-
-        // .process(wiretapMail)
         onException(MailException.class).continued(true).to(
                 "direct:logMailException");
 
@@ -101,9 +100,13 @@ public class RouteConfig extends RouteBuilder {
                 .wireTap("direct:logMail", wiretapMail)
                 //.process(mailTranslator)
                 .process(mailProcessor)
-//                .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant(filename)).to("file:XMLExports?autoCreate=true")
+                .multicast().parallelProcessing()
+                .to("direct:storeXMLEmail", "direct:spamChecking");
 //                .to("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=XMLExports&remotePath=/root/XMLExports")
-                .to("direct:spamChecking");
+
+        from("direct:storeXMLEmail")
+                .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant(filename))
+                .to("file:XMLExports?autoCreate=true");
 
         from("direct:logMail")
                 .to("file:logs/wiretap-logs/logMail");
