@@ -66,13 +66,15 @@ public class FacebookProcessor implements Processor {
         ArrayList<Comment> commentList = new ArrayList<Comment>();
         commentList.add(comment);
         
-        for(facebook4j.Comment c: post.getComments()){
-            Comment newComment = new Comment();
-            newComment.setFrom(c.getFrom().getName());
-            newComment.setMessage(c.getMessage());
-            newComment.setDate(c.getCreatedTime());
-       	
-            commentList.add(newComment);
+        if(post.getComments() != null){
+	        for(facebook4j.Comment c: post.getComments()){
+	            Comment newComment = new Comment();
+	            newComment.setFrom(c.getFrom().getName());
+	            newComment.setMessage(c.getMessage());
+	            newComment.setDate(c.getCreatedTime());
+	       	
+	            commentList.add(newComment);
+	        }
         }
         
         businessCase.setComments(commentList);
