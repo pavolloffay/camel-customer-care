@@ -46,7 +46,10 @@ public class RouteConfig extends RouteBuilder {
         from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
                 .process(mailTranslator)
                 .process(mailProcessor)
-                .to("direct:spamChecking");
+                .to("direct:spamChecking")
+                .wireTap("direct:log");
+        
+        from("direct:log").to("file:target/reports/report.txt");
 
         from("direct:spamChecking")
                 .filter().method(SpamFilter.class, "isNoSpam")
