@@ -34,11 +34,11 @@
     </bean>
 
     <bean id="googleCalendarConfiguration" class="org.apache.camel.component.google.calendar.GoogleCalendarConfiguration">
-        <property name="accessToken" value="ya29.eAFwMN4h_ZkMP108QnxY-sTCq8bWlGIvCZ-y6Bha_RTcsSRHZvoCuNoATX4XlkdRLf1VnsStD5rOTg" />
-        <property name="refreshToken" value="$1/bNQP8UkerOT6cGWoCmisosbd5a_MltMq785zrXvBeHU" />
-        <property name="clientId" value="321201066612-tekf02kmbj3gbf90t2nml6o017p50db2.apps.googleusercontent.com" />
-        <property name="clientSecret" value="U0rA4GJJj6aWiCrmoK5VPqzR"/>
-        <property name="applicationName" value="customerCare" />
+        <property name="accessToken" value="${google.access.token}" />
+        <property name="refreshToken" value="${google.refresh.token}" />
+        <property name="clientId" value="${google.client.id}" />
+        <property name="clientSecret" value="${google.client.secret}"/>
+        <property name="applicationName" value="${google.application.name}" />
     </bean>
     <bean id="google-calendar" class="org.apache.camel.component.google.calendar.GoogleCalendarComponent">
         <property name="camelContext" ref="camel"/>
