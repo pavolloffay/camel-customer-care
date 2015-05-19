@@ -74,7 +74,7 @@ public class RouteConfig extends RouteBuilder {
          * from(direct:careCenter).().(send email)
          */
 
-        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
+        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}&consumer.delay=5000")
                 .process(facebookProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
 //        we could perform spam checking and then distinguish multiple paths for beans see body().isInstanceOf()
