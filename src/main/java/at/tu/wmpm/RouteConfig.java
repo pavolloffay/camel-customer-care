@@ -119,8 +119,6 @@ public class RouteConfig extends RouteBuilder {
 		 * Facebook Channel
 		 */
 		from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}")
-				// from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
-				.wireTap("direct:logFacebook", wiretapFacebook)
 				.process(facebookProcessor)
 				.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
 		// we could perform spam checking and then distinguish multiple paths
