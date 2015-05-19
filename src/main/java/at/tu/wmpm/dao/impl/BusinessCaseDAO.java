@@ -25,7 +25,7 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
 
     private static final Logger log = LoggerFactory.getLogger(BusinessCaseDAO.class);
 
-    private static String DB_NAME = "customerCare";
+    private static String DB_NAME = "wmpm";
     private static String COLLECTION_NAME = "businessCases";
 
     @Autowired
@@ -43,7 +43,12 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
 
     @PostConstruct
     public void postConstruct() throws IOException {
-        log.info("\n\nmongo DAO\n\n");
+        /**
+         * remove old data
+         */
+        db = mongo.getDB(DB_NAME);
+        dbCollection = db.getCollection(COLLECTION_NAME);
+        dbCollection.drop();
 
         if (mongo == null) {
             log.debug("\n\n\n\n is null");
@@ -58,10 +63,10 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
     }
 
     @Override
-    public void save(MailBusinessCase MailBusinessCase) {
-        log.debug("Saving mail {}", MailBusinessCase);
-        WriteResult<MailBusinessCase, String> result = jacksonDBCollection.insert(MailBusinessCase);
-        MailBusinessCase.setId(result.getSavedId());
+    public void save(MailBusinessCase mailBusinessCase) {
+        log.debug("Saving mail {}", mailBusinessCase);
+        WriteResult<MailBusinessCase, String> result = jacksonDBCollection.insert(mailBusinessCase);
+        mailBusinessCase.setId(result.getSavedId());
     }
 
     @Override
@@ -80,12 +85,12 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
     }
 
     private List<MailBusinessCase> cursorToList(org.mongojack.DBCursor<MailBusinessCase> dbCursor) {
-        List<MailBusinessCase> MailBusinessCases = new ArrayList<>();
+        List<MailBusinessCase> mailBusinessCases = new ArrayList<>();
         while (dbCursor.hasNext()) {
-            MailBusinessCase MailBusinessCase = dbCursor.next();
-            MailBusinessCases.add(MailBusinessCase);
+            MailBusinessCase mailBusinessCase = dbCursor.next();
+            mailBusinessCases.add(mailBusinessCase);
         }
 
-        return MailBusinessCases;
+        return mailBusinessCases;
     }
 }
