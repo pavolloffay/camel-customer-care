@@ -6,7 +6,6 @@ import java.util.Date;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ import at.tu.wmpm.processor.MongoProcessor;
 import at.tu.wmpm.processor.WireTapLogFacebook;
 import at.tu.wmpm.processor.WireTapLogMail;
 import at.tu.wmpm.processor.WireTapLogTwitter;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015
@@ -34,6 +34,12 @@ import at.tu.wmpm.processor.WireTapLogTwitter;
 public class RouteConfig extends RouteBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(RouteConfig.class);
+
+    @Value("${dropbox.access.token}")
+    private String DROPBOX_ACCESS_TOKEN;
+    @Value("${dropbox.client.identifier}")
+    private String DROPBOX_CLIENT_IDENTIFIER;
+    private String DROPBOX__AUTH_PARAMETERS;
 
     @Autowired
     private MailProcessor mailProcessor;
@@ -57,6 +63,7 @@ public class RouteConfig extends RouteBuilder {
     @PostConstruct
     public void postConstruct() {
         log.debug("Configuring routes");
+        DROPBOX__AUTH_PARAMETERS = "accessToken=" + DROPBOX_ACCESS_TOKEN + "&clientIdentifier=" +  DROPBOX_CLIENT_IDENTIFIER;
     }
 
     @SuppressWarnings({ "deprecation" })
@@ -90,12 +97,12 @@ public class RouteConfig extends RouteBuilder {
         /**
          * E-Mail Channel
          */
-        from("pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
+        from("pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
                 .wireTap("direct:logMail", wiretapMail)
                 //.process(mailTranslator)
                 .process(mailProcessor)
 //                .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant(filename)).to("file:XMLExports?autoCreate=true")
-                //.to("dropbox://put?accessToken={{DBAccessToken}}&clientIdentifier={{DBClientIdentifier}}&uploadMode=add&localPath=XMLExports&remotePath=/root/XMLExports")
+//                .to("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=XMLExports&remotePath=/root/XMLExports")
                 .to("direct:spamChecking");
 
         from("direct:logMail")
@@ -115,7 +122,7 @@ public class RouteConfig extends RouteBuilder {
         from("direct:autoReplyEmail")
                 .process(autoReplyHeadersProcessor)
                 .to("velocity:mail-templates/auto-reply.vm")
-                .to("smtps://{{eMailSMTPAddress}}:{{eMailSMTPPort}}?password={{eMailPassword}}&username={{eMailUserName}}");
+                .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}");
 
         /**
          * add calendar events for employees forward event for employees
@@ -130,7 +137,7 @@ public class RouteConfig extends RouteBuilder {
         /**
          * Facebook Channel
          */
-        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}")
+        from("facebook://getTagged?reading.since=1.1.2015&userId={{facebook.page.id}}")
                 .process(facebookProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
         // we could perform spam checking and then distinguish multiple paths

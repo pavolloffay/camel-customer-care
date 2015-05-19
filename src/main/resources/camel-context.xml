@@ -28,9 +28,9 @@
     </bean>
 
     <bean id="facebookConfiguration" class="org.apache.camel.component.facebook.config.FacebookConfiguration" >
-        <property name="OAuthAppId" value="${FBid}" />
-        <property name="OAuthAppSecret" value="${FBsecret}" />
-        <property name="OAuthAccessToken" value="${FBaccessToken}" />
+        <property name="OAuthAppId" value="${facebook.id}" />
+        <property name="OAuthAppSecret" value="${facebook.secret}" />
+        <property name="OAuthAccessToken" value="${facebook.access.token}" />
     </bean>
 
     <bean id="googleCalendarConfiguration" class="org.apache.camel.component.google.calendar.GoogleCalendarConfiguration">
