@@ -1,5 +1,6 @@
 package at.tu.wmpm.processor;
 
+import java.math.BigInteger;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
@@ -50,6 +51,8 @@ public class FacebookProcessor implements Processor {
         FacebookBusinessCase businessCase = new FacebookBusinessCase();
         businessCase.setSender(post.getFrom().getName());
         businessCase.setBody(post.getMessage());
+        businessCase.setFacebookUserId(post.getFrom().getId());
+        businessCase.setFacebookPostId(post.getId());
  
         Message message = new DefaultMessage();
         message.setBody(businessCase);

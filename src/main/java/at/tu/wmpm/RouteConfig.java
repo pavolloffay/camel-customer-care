@@ -75,7 +75,8 @@ public class RouteConfig extends RouteBuilder {
          */
 
         from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
-                .process(facebookProcessor);
+                .process(facebookProcessor)
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
 //        we could perform spam checking and then distinguish multiple paths for beans see body().isInstanceOf()
 //            .to("direct:spam");
     }
