@@ -34,7 +34,6 @@
     </bean>
 
     <bean id="googleCalendarConfiguration" class="org.apache.camel.component.google.calendar.GoogleCalendarConfiguration">
-        <property name="accessToken" value="${google.access.token}" />
         <property name="refreshToken" value="${google.refresh.token}" />
         <property name="clientId" value="${google.client.id}" />
         <property name="clientSecret" value="${google.client.secret}"/>
