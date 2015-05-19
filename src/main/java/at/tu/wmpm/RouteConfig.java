@@ -74,7 +74,7 @@ public class RouteConfig extends RouteBuilder {
          * from(direct:careCenter).().(send email)
          */
 
-        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}")
+        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&consumer.delay=5000")
 //        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
                 .process(facebookProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
