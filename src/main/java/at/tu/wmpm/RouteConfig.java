@@ -1,6 +1,5 @@
 package at.tu.wmpm;
 
-import org.apache.camel.RuntimeCamelException;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,7 @@ import at.tu.wmpm.processor.*;
 import javax.annotation.PostConstruct;
 
 /**
- * Created by pavol on 30.04.2015 Edited by christian on 07.05.2015
+ * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015
  */
 public class RouteConfig extends RouteBuilder {
 
@@ -84,7 +83,8 @@ public class RouteConfig extends RouteBuilder {
 				"pop3s://{{eMailUserName}}@{{eMailPOPAddress}}:{{eMailPOPPort}}?password={{eMailPassword}}")
 				.wireTap("direct:logMail", wiretapMail)
 				.process(mailTranslator)
-				.process(mailProcessor).to("direct:spamChecking");
+				.process(mailProcessor)
+				.to("direct:spamChecking");
 
 		from("direct:logMail").to("file:logs/wiretap-logs/logMail");
 

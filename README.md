@@ -14,7 +14,7 @@ Applicaiton demonstrates usage of multiple Apache Camel EIP & Components
 * [Communication channel - Telegram, WMaPM group](https://telegram.org/)
 * [Time tracking](https://docs.google.com/spreadsheets/d/13BJXuBs2Up3XPB6XWHJ_5cI9D63UiO2llYF5iNy_AbI/edit#gid=0)
 
-### Email & Facebook accounts
+### Email & Facebook & Dropbox accounts
 * customer.care.tu.wien@gmail.com
 * pass: customerCare123
 

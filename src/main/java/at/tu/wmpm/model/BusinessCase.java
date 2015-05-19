@@ -1,7 +1,11 @@
 package at.tu.wmpm.model;
 
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.*;
+
 import org.mongojack.ObjectId;
 
 
@@ -15,6 +19,7 @@ public abstract class BusinessCase {
     private String parentId;
     private String sender;
     private boolean isNew;
+    private ArrayList<Comment> comments;
 
     @JsonIgnore
     public boolean isNew() {
@@ -66,8 +71,20 @@ public abstract class BusinessCase {
     public final void setId(String id) {
         this.id = id;
     }
+    
+    public ArrayList<Comment> getComments() {
+		return comments;
+	}
 
-    @Override
+	public void setComments(ArrayList<Comment> comments) {
+		this.comments = comments;
+	}
+	
+	public void addComment(Comment comment){
+		this.comments.add(comment);
+	}
+
+	@Override
     public String toString() {
         return "ID: "+id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject+", Body: "+body;
     }

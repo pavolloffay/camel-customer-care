@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 
 import at.tu.wmpm.exception.TwitterException;
 
+/**
+ * 
+ * @author Christian
+ *
+ */
 @Service
 public class WireTapLogTwitter implements Processor {
 

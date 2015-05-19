@@ -9,6 +9,11 @@ import org.springframework.stereotype.Service;
 
 import at.tu.wmpm.exception.MailException;
 
+/**
+ * 
+ * @author Christian
+ *
+ */
 @Service
 public class WireTapLogMail implements Processor {
 

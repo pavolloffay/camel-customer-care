@@ -1,6 +1,7 @@
 package at.tu.wmpm.processor;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
@@ -12,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import facebook4j.Facebook;
 import facebook4j.Post;
+import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.FacebookBusinessCase;
 import at.tu.wmpm.model.MailBusinessCase;
 
@@ -53,7 +56,27 @@ public class FacebookProcessor implements Processor {
         businessCase.setBody(post.getMessage());
         businessCase.setFacebookUserId(post.getFrom().getId());
         businessCase.setFacebookPostId(post.getId());
+        
  
+        Comment comment = new Comment();
+        comment.setFrom(post.getFrom().getName());
+        comment.setMessage(post.getMessage());
+        comment.setDate(post.getCreatedTime());
+        
+        ArrayList<Comment> commentList = new ArrayList<Comment>();
+        commentList.add(comment);
+        
+        for(facebook4j.Comment c: post.getComments()){
+            Comment newComment = new Comment();
+            newComment.setFrom(c.getFrom().getName());
+            newComment.setMessage(c.getMessage());
+            newComment.setDate(c.getCreatedTime());
+       	
+            commentList.add(newComment);
+        }
+        
+        businessCase.setComments(commentList);
+        
         Message message = new DefaultMessage();
         message.setBody(businessCase);
         
