@@ -83,18 +83,18 @@ public abstract class BusinessCase {
     }
 
     public ArrayList<Comment> getComments() {
-		return comments;
-	}
+        return comments;
+    }
 
-	public void setComments(ArrayList<Comment> comments) {
-		this.comments = comments;
-	}
+    public void setComments(ArrayList<Comment> comments) {
+        this.comments = comments;
+    }
 
-	public void addComment(Comment comment){
-		this.comments.add(comment);
-	}
+    public void addComment(Comment comment){
+        this.comments.add(comment);
+    }
 
-	@Override
+    @Override
     public String toString() {
         return "ID: "+id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject+", Body: "+body;
     }

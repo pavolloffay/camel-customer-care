@@ -67,14 +67,14 @@ public class FacebookProcessor implements Processor {
         commentList.add(comment);
         
         if(post.getComments() != null){
-	        for(facebook4j.Comment c: post.getComments()){
-	            Comment newComment = new Comment();
-	            newComment.setFrom(c.getFrom().getName());
-	            newComment.setMessage(c.getMessage());
-	            newComment.setDate(c.getCreatedTime());
-	       	
-	            commentList.add(newComment);
-	        }
+            for(facebook4j.Comment c: post.getComments()){
+                Comment newComment = new Comment();
+                newComment.setFrom(c.getFrom().getName());
+                newComment.setMessage(c.getMessage());
+                newComment.setDate(c.getCreatedTime());
+
+                commentList.add(newComment);
+            }
         }
         
         businessCase.setComments(commentList);
@@ -82,7 +82,6 @@ public class FacebookProcessor implements Processor {
         Message message = new DefaultMessage();
         message.setBody(businessCase);
         
-        exchange.setOut(message);    	
-
+        exchange.setOut(message);
     }
 }
