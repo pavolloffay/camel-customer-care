@@ -116,12 +116,6 @@
             <groupId>org.apache.camel</groupId>
             <artifactId>camel-google-calendar</artifactId>
             <version>${camel.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jackson-core</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- MongoDB -->
@@ -147,4 +141,14 @@
             <version>2.6</version>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <artifactId>jackson-core</artifactId>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <version>2.4.5</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

@@ -67,17 +67,23 @@ public class RouteConfig extends RouteBuilder {
          * add calendar events for employees
          * forward event for employees
          */
-        from("direct:addToCalendar").process(calendarProcessor); //.to("direct:careCenter")
+//        from("direct:addToCalendar").process(calendarProcessor).to("google-calendar://list/list"); //.to("direct:careCenter")
 
         /**
          * process for care center employees
          * from(direct:careCenter).().(send email)
          */
 
-        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
+        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}")
+//        from("facebook://getTagged?reading.since=1.1.2015&userId={{FBpageId}}&oAuthAppId={{FBid}}&oAuthAppSecret={{FBsecret}}&oAuthAccessToken={{FBaccessToken}}")
                 .process(facebookProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
 //        we could perform spam checking and then distinguish multiple paths for beans see body().isInstanceOf()
 //            .to("direct:spam");
+
+        /**
+         * TODO remove - just test for google-calendar
+         */
+        from("google-calendar://calendars/get?calendarId={{google.calendar.id}}").process(calendarProcessor);
     }
 }
