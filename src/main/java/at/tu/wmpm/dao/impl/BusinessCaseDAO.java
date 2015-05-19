@@ -10,6 +10,7 @@ import org.mongojack.WriteResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -25,12 +26,13 @@ public class BusinessCaseDAO implements IBusinessCaseDAO {
 
     private static final Logger log = LoggerFactory.getLogger(BusinessCaseDAO.class);
 
-    private static String DB_NAME = "wmpm";
-    private static String COLLECTION_NAME = "businessCases";
+    @Value("${mongodb.database}")
+    private String DB_NAME;
+    @Value("${mongodb.collection}")
+    private String COLLECTION_NAME = "businessCases";
 
     @Autowired
     private Mongo mongo;
-
 
     private DB db;
     private DBCollection dbCollection;
