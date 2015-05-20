@@ -12,6 +12,7 @@ import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import at.tu.wmpm.exception.FacebookException;
 import at.tu.wmpm.exception.MailException;
@@ -22,12 +23,10 @@ import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
 import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.FacebookProcessor;
 import at.tu.wmpm.processor.MailProcessor;
-import at.tu.wmpm.processor.MailToXml;
 import at.tu.wmpm.processor.MongoProcessor;
 import at.tu.wmpm.processor.WireTapLogFacebook;
 import at.tu.wmpm.processor.WireTapLogMail;
 import at.tu.wmpm.processor.WireTapLogTwitter;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015
@@ -94,13 +93,13 @@ public class RouteConfig extends RouteBuilder {
                 .wireTap("direct:logMail", wiretapMail)
                 //.process(mailTranslator)
                 .process(mailProcessor)
-                .multicast().parallelProcessing()
-                .to("direct:storeXMLEmail", "direct:spamChecking");
-//                .to("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=XMLExports&remotePath=/root/XMLExports")
+                //.multicast().parallelProcessing()
+                .to("direct:spamChecking");
 
         from("direct:storeXMLEmail")
-                .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant(filename))
-                .to("file:XMLExports?autoCreate=true");
+                .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant("ex1.xml"))
+                .to("file:logs/XMLExports?autoCreate=true")
+                .to("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=logs/XMLExports/ex1.xml&remotePath=/XMLExports/"+filename);
 
         from("direct:logMail")
                 .to("file:logs/wiretap-logs/logMail");
@@ -112,7 +111,7 @@ public class RouteConfig extends RouteBuilder {
                 .when(body(BusinessCase.class).method("isNew").isEqualTo(true))
                     .setHeader("Subject", body(BusinessCase.class).method("getId"))
                     .multicast().parallelProcessing()
-                    .to("direct:autoReplyEmail", "direct:addToCalendar").endChoice()
+                    .to("direct:autoReplyEmail", "direct:addToCalendar", "direct:storeXMLEmail").endChoice()
                 .otherwise()
                     .to("direct:addToCalendar");
 
