@@ -1,14 +1,18 @@
 package at.tu.wmpm;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
+import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +22,7 @@ import at.tu.wmpm.exception.MailException;
 import at.tu.wmpm.exception.TwitterException;
 import at.tu.wmpm.filter.SpamFilter;
 import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.model.FacebookBusinessCase;
 import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
 import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.FacebookProcessor;
@@ -27,7 +32,10 @@ import at.tu.wmpm.processor.MongoProcessor;
 import at.tu.wmpm.processor.WireTapLogFacebook;
 import at.tu.wmpm.processor.WireTapLogMail;
 import at.tu.wmpm.processor.WireTapLogTwitter;
+
 import org.springframework.beans.factory.annotation.Value;
+
+import com.mongodb.BasicDBObject;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015
@@ -145,6 +153,18 @@ public class RouteConfig extends RouteBuilder {
         from("direct:logFacebook")
                 .to("file:logs/wiretap-logs/logFacebook");
 
+        from("timer://commentfetch?fixedRate=true&period=10000").to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll").split(body()).process(new Processor() {
+            public void process(Exchange exchange) throws Exception {
+                BasicDBObject dbObject = (BasicDBObject)exchange.getIn().getBody();
+                
+	                Morphia morphia = new Morphia();
+	                morphia.map(FacebookBusinessCase.class);
+	                FacebookBusinessCase bc = morphia.fromDBObject(FacebookBusinessCase.class, dbObject);	                
+                
+                // do something with the payload and/or exchange here
+           }
+        });
+        
         /**
          * TODO remove - just test for google-calendar
          */

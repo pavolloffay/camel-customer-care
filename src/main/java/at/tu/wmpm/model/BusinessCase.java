@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.xml.bind.annotation.*;
 
+import org.mongodb.morphia.annotations.Id;
 import org.mongojack.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,7 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class BusinessCase {
-
+	
+	@Id
     @ObjectId
     @JsonProperty("_id")
     private String id;
