@@ -135,7 +135,7 @@ public class RouteConfig extends RouteBuilder {
         /**
          * Facebook Channel
          */
-        from("facebook://getTagged?reading.since=1.1.2015&userId={{facebook.page.id}}")
+        from("facebook://getTagged?reading.since=1.1.2015&userId={{facebook.page.id}}&consumer.delay=10000")
                 .process(facebookProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
         // we could perform spam checking and then distinguish multiple paths
