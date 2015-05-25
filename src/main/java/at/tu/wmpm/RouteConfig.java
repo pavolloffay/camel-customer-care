@@ -136,13 +136,19 @@ public class RouteConfig extends RouteBuilder {
          */
         from("facebook://getTagged?reading.since=1.1.2015&userId={{facebook.page.id}}")
                 .process(facebookProcessor)
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
+                .multicast().parallelProcessing()
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert", "direct:facebookToXml");
         // we could perform spam checking and then distinguish multiple paths
         // for beans see body().isInstanceOf()
         // .to("direct:spam");
 
         from("direct:logFacebook")
                 .to("file:logs/wiretap-logs/logFacebook");
+
+        from("direct:facebookToXml")
+                .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant("ex2.xml"))
+                .to("file:logs/XMLExports?autoCreate=true")
+                .to("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=logs/XMLExports/ex2.xml&remotePath=/XMLExports/"+filename);
 
         /**
          * TODO remove - just test for google-calendar
