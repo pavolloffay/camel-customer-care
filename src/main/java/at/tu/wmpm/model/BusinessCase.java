@@ -1,6 +1,5 @@
 package at.tu.wmpm.model;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -25,8 +24,6 @@ public abstract class BusinessCase {
     private String parentId;
     private String sender;
     private String incomingDate;
-    @JsonIgnore
-    private SimpleDateFormat sf = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
     @JsonIgnore
     private boolean isNew;
     private ArrayList<Comment> comments;
