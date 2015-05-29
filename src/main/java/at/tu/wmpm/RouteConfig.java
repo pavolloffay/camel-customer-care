@@ -99,7 +99,7 @@ public class RouteConfig extends RouteBuilder {
         from("direct:storeXMLEmail")
                 .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant("ex1.xml"))
                 .to("file:logs/XMLExports?autoCreate=true")
-                .to("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=logs/XMLExports/ex1.xml&remotePath=/XMLExports/"+filename);
+                .recipientList(simple("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=logs/XMLExports/ex1.xml&remotePath=/XMLExports/M_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
 
         from("direct:logMail")
                 .to("file:logs/wiretap-logs/logMail");
@@ -148,7 +148,7 @@ public class RouteConfig extends RouteBuilder {
         from("direct:facebookToXml")
                 .marshal(jaxbFormat).setHeader(Exchange.FILE_NAME, constant("ex2.xml"))
                 .to("file:logs/XMLExports?autoCreate=true")
-                .to("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=logs/XMLExports/ex2.xml&remotePath=/XMLExports/"+filename);
+                .recipientList(simple("dropbox://put?" + DROPBOX__AUTH_PARAMETERS + "&uploadMode=add&localPath=logs/XMLExports/ex2.xml&remotePath=/XMLExports/FB_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
 
         /**
          * TODO remove - just test for google-calendar
