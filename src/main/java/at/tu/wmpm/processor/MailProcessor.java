@@ -1,6 +1,9 @@
 package at.tu.wmpm.processor;
 
-import at.tu.wmpm.model.MailBusinessCase;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
@@ -10,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import at.tu.wmpm.model.MailBusinessCase;
 
 /**
  * Created by pavol on 18.5.2015.
@@ -41,6 +42,7 @@ public class MailProcessor implements Processor {
         mailBusinessCase.setBody(inMessageBody);
         mailBusinessCase.setSubject(subject);
         mailBusinessCase.setNew(true);
+        mailBusinessCase.setIncomingDate(inHeaders.get("Date").toString());
 
         Matcher matcher = ID_PATTERN.matcher(subject);
         String parentId = null;
