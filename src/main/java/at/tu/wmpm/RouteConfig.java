@@ -185,12 +185,13 @@ public class RouteConfig extends RouteBuilder {
          * Backup Logs to dropbox every 30 seconds (interval currently set for
          * testing purposes)
          */
-//        from("quartz2://LogBackup?cron=0/30+*+*+*+*+?")
-//                .to("dropbox://put?"
-//                        + DROPBOX__AUTH_PARAMETERS
-//                        + "&uploadMode=add&localPath=logs&remotePath=/logs_${date:now:yyyyMMdd_HH-mm-SS}")
-//                .wireTap("direct:logDropbox", wiretapDropbox);
-//        
-//        from("direct:logDropbox").to("file:logs/wiretap-logs/logDropbox");
+        from("quartz2://LogBackup?cron=0/30+*+*+*+*+?").process(wiretapDropbox);
+        // .to("dropbox://put?"
+        // + DROPBOX__AUTH_PARAMETERS
+        // +
+        // "&uploadMode=add&localPath=logs&remotePath=/logs_${date:now:yyyyMMdd_HH-mm-SS}")
+        // .wireTap("direct:logDropbox", wiretapDropbox);
+
+        from("direct:logDropbox").to("file:logs/wiretap-logs/logDropbox");
     }
 }
