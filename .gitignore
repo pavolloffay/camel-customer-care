@@ -63,3 +63,5 @@ activemq-data
 /bin/
 ex2.xml
 forDropbox.txt
+logs/
+logs/XMLExports/twitter_ex.xml

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<businessCase>
-    <body>Test Camel Tweet</body>
-    <sender>TU Wien CustomerCare</sender>
-    <incomingDate>Mon Jun 01 00:52:33 CEST 2015</incomingDate>
-    <isNew>false</isNew>
-</businessCase>
