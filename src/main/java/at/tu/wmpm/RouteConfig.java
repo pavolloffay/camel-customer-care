@@ -193,12 +193,12 @@ public class RouteConfig extends RouteBuilder {
         from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
                 + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                 + "accessTokenSecret={{twitter.access.token.secret}}")
+                .wireTap("direct:logTwitter", wiretapTwitter)
                 .process(twitterProcessor)
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
-                        "direct:twitterToXml")
-                .wireTap("direct:logTwitter", wiretapTwitter);
+                        "direct:twitterToXml");
 
         from("direct:twitterToXml")
                 .marshal(jaxbFormat)
@@ -207,7 +207,8 @@ public class RouteConfig extends RouteBuilder {
                 .recipientList(
                         simple("dropbox://put?"
                                 + DROPBOX__AUTH_PARAMETERS
-                                + "&uploadMode=add&localPath=logs/XMLExports/twitter_ex.xml&remotePath=/XMLExports/Twitter_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
+                                + "&uploadMode=add&localPath=logs/XMLExports/twitter_ex.xml&remotePath=/XMLExports/Twitter_${date:now:yyyyMMdd_HH-mm-SS}.xml"))
+                .wireTap("direct:logDropbox", wiretapDropbox);
 
         from("direct:logTwitter")
         .to("file:logs/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
