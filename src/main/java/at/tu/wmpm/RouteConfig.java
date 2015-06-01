@@ -25,13 +25,14 @@ import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.FacebookProcessor;
 import at.tu.wmpm.processor.MailProcessor;
 import at.tu.wmpm.processor.MongoProcessor;
+import at.tu.wmpm.processor.TwitterProcessor;
 import at.tu.wmpm.processor.WireTapLogDropbox;
 import at.tu.wmpm.processor.WireTapLogFacebook;
 import at.tu.wmpm.processor.WireTapLogMail;
 import at.tu.wmpm.processor.WireTapLogTwitter;
 
 /**
- * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015
+ * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015 edited by johannes on 31.05.2015
  */
 public class RouteConfig extends RouteBuilder {
 
@@ -62,6 +63,8 @@ public class RouteConfig extends RouteBuilder {
     private WireTapLogTwitter wiretapTwitter;
     @Autowired
     private WireTapLogDropbox wiretapDropbox;
+    @Autowired
+    private TwitterProcessor twitterProcessor;
 
     @PostConstruct
     public void postConstruct() {
@@ -173,7 +176,15 @@ public class RouteConfig extends RouteBuilder {
                         simple("dropbox://put?"
                                 + DROPBOX__AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/ex2.xml&remotePath=/XMLExports/FB_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
+        /**
+         * Twitter Channel
+         */
 
+        from("twitter://timeline/home?type=polling&delay=40&consumerKey={{twitter.consumer.key}}&"
+                + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
+                + "accessTokenSecret={{twitter.access.token.secret}}")
+                .process(twitterProcessor)
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
         /**
          * TODO remove - just test for google-calendar
          */
@@ -190,7 +201,7 @@ public class RouteConfig extends RouteBuilder {
 //                        + DROPBOX__AUTH_PARAMETERS
 //                        + "&uploadMode=add&localPath=logs&remotePath=/logs_${date:now:yyyyMMdd_HH-mm-SS}")
 //                .wireTap("direct:logDropbox", wiretapDropbox);
-//        
+//
 //        from("direct:logDropbox").to("file:logs/wiretap-logs/logDropbox");
     }
 }
