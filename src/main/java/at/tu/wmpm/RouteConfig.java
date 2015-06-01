@@ -190,11 +190,29 @@ public class RouteConfig extends RouteBuilder {
          * Twitter Channel
          */
 
-        from("twitter://timeline/home?type=polling&delay=40&consumerKey={{twitter.consumer.key}}&"
+        from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
                 + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                 + "accessTokenSecret={{twitter.access.token.secret}}")
                 .process(twitterProcessor)
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert");
+                .multicast()
+                .parallelProcessing()
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
+                        "direct:twitterToXml")
+                .wireTap("direct:logTwitter", wiretapTwitter);
+
+        from("direct:twitterToXml")
+                .marshal(jaxbFormat)
+                .setHeader(Exchange.FILE_NAME, constant("twitter_ex.xml"))
+                .to("file:logs/XMLExports?autoCreate=true")
+                .recipientList(
+                        simple("dropbox://put?"
+                                + DROPBOX__AUTH_PARAMETERS
+                                + "&uploadMode=add&localPath=logs/XMLExports/twitter_ex.xml&remotePath=/XMLExports/Twitter_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
+
+        from("direct:logTwitter")
+        .to("file:logs/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
+
+
         /**
          * TODO remove - just test for google-calendar
          */

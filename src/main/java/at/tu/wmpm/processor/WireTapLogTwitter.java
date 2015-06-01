@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import at.tu.wmpm.exception.TwitterException;
 
 /**
- * 
+ *
  * @author Christian
  *
  */
@@ -24,7 +24,7 @@ public class WireTapLogTwitter implements Processor {
         // String subject = (String) exchange.getIn().getHeader("Subject");
         // String from = (String) exchange.getIn().getHeader("From");
         // String to = (String) exchange.getIn().getHeader("To");
-        String body = (String) exchange.getIn().getBody();
+        String body = exchange.getIn().getBody(String.class);
 
         body = "Wiretap - TwitterLog on " + timeStamp + "\n" + "> Body:\n"
                 + body;

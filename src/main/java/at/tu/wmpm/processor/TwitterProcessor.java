@@ -23,7 +23,7 @@ public class TwitterProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
 
-
+        log.debug("\nTweet recieved\n");
 
         Message in = exchange.getIn();
         Status status = (Status) in.getBody();
