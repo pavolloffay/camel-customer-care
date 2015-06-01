@@ -3,6 +3,7 @@ package at.tu.wmpm;
 //import java.text.SimpleDateFormat;
 //import java.util.Date;
 
+import javax.activation.DataHandler;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 
@@ -12,6 +13,7 @@ import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
+import org.apache.camel.impl.DefaultMessage;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
@@ -25,13 +27,16 @@ import at.tu.wmpm.exception.MailException;
 import at.tu.wmpm.exception.TwitterException;
 import at.tu.wmpm.filter.SpamFilter;
 import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.FacebookBusinessCase;
 import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
 import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.FacebookProcessor;
+import at.tu.wmpm.processor.FacebookUpdatePostProcessor;
 import at.tu.wmpm.processor.FileAggregationStrategy;
 import at.tu.wmpm.processor.FileProcessor;
 import at.tu.wmpm.processor.MailProcessor;
+import at.tu.wmpm.processor.MongoDbBusinessCaseProcessor;
 import at.tu.wmpm.processor.MongoProcessor;
 import at.tu.wmpm.processor.TwitterProcessor;
 import at.tu.wmpm.processor.WireTapLogDropbox;
@@ -61,6 +66,10 @@ public class RouteConfig extends RouteBuilder {
     private MailProcessor mailProcessor;
     @Autowired
     private FacebookProcessor facebookProcessor;
+    @Autowired
+    private FacebookUpdatePostProcessor facebookUpdatePostProcessor;
+    @Autowired
+    private MongoDbBusinessCaseProcessor mongoDbProcessor;
     @Autowired
     private MongoProcessor mongoProcessor;
     @Autowired
@@ -188,35 +197,13 @@ public class RouteConfig extends RouteBuilder {
         from("direct:logFacebook")
                 .to("file:logs/workingdir/wiretap-logs/logFacebook?fileName=facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
-        from("timer://commentfetch?fixedRate=true&period=10000").to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll").split(body()).process(new Processor() {
-            public void process(Exchange exchange) throws Exception {
-                BasicDBObject dbObject = (BasicDBObject)exchange.getIn().getBody();
-                
-	                Morphia morphia = new Morphia();
-	                morphia.map(FacebookBusinessCase.class);
-	                FacebookBusinessCase bc = morphia.fromDBObject(FacebookBusinessCase.class, dbObject);	
-                
-	                //exchange.setPattern(ExchangePattern.InOut);
-	                //exchange.getOut().setHeader("CamelFacebook.postId", bc.getFacebookPostId());
-	                //log.debug(ReflectionToStringBuilder.toString(exchange));
-           }
-        }).to("direct:processNewComments");
+        from("timer://commentfetch?fixedRate=true&period=10000").to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll").split(body()).process(mongoDbProcessor).to("direct:processNewComments");
         
         
-        from("direct:processNewComments").to("facebook://getPost?postId=1398676863790958_1404088929916418").process(new Processor() {
-            public void process(Exchange exchange) throws Exception {
-            	
-                log.debug("\n\nFACEBOOK ");
-                log.debug(ReflectionToStringBuilder.toString(exchange));
-                log.debug("\n\n");
-            	
-            	System.out.println(exchange.getIn().getHeaders());
-            
-            	//Post post = (Post)exchange.getIn().getBody();
-            	//System.out.println(post);
-                
-           }
-        });
+        from("direct:processNewComments")
+        		.to("facebook://post?postId=seeHeader")
+        		.process(facebookUpdatePostProcessor)
+        		.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
         
         from("direct:facebookToXml")
                 .marshal(jaxbFormat)
@@ -230,7 +217,7 @@ public class RouteConfig extends RouteBuilder {
          * Twitter Channel
          */
 
-        /*from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
+        from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
                 + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                 + "accessTokenSecret={{twitter.access.token.secret}}")
                 .wireTap("direct:logTwitter", wiretapTwitter)
@@ -252,7 +239,7 @@ public class RouteConfig extends RouteBuilder {
 
         from("direct:logTwitter")
         .to("file:logs/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-		*/
+		
 
         /**
          * TODO remove - just test for google-calendar

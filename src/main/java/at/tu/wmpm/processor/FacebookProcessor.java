@@ -36,9 +36,9 @@ public class FacebookProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
 
-        log.debug("\n\nFACEBOOK");
-        log.debug(ReflectionToStringBuilder.toString(exchange));
-        log.debug("\n\n");
+        //log.debug("\n\nFACEBOOK");
+        //log.debug(ReflectionToStringBuilder.toString(exchange));
+        //log.debug("\n\n");
 
         Message in = exchange.getIn();
 
@@ -59,6 +59,7 @@ public class FacebookProcessor implements Processor {
         comment.setFrom(post.getFrom().getName());
         comment.setMessage(post.getMessage());
         comment.setDate(post.getCreatedTime());
+        comment.setId(post.getId());
 
         ArrayList<Comment> commentList = new ArrayList<Comment>();
         commentList.add(comment);
@@ -69,6 +70,7 @@ public class FacebookProcessor implements Processor {
                 newComment.setFrom(c.getFrom().getName());
                 newComment.setMessage(c.getMessage());
                 newComment.setDate(c.getCreatedTime());
+                newComment.setId(c.getId());
 
                 commentList.add(newComment);
             }

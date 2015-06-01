@@ -1,6 +1,7 @@
 package at.tu.wmpm.model;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -16,10 +17,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class BusinessCase {
 	
+	public BusinessCase() {
+	    this._id = UUID.randomUUID().toString();
+    }
+
 	@Id
     @ObjectId
     @JsonProperty("_id")
-    private String id;
+    private String _id;
     private String subject;
     private String body;
     @JsonProperty("parent_id")
@@ -29,6 +34,8 @@ public abstract class BusinessCase {
     @JsonIgnore
     private boolean isNew;
     private ArrayList<Comment> comments;
+    
+     
 
     public boolean isNew() {
         return isNew;
@@ -71,11 +78,11 @@ public abstract class BusinessCase {
     }
 
     public final String getId() {
-        return id;
+        return _id;
     }
 
     public final void setId(String id) {
-        this.id = id;
+        this._id = id;
     }
 
     public ArrayList<Comment> getComments() {
@@ -92,7 +99,7 @@ public abstract class BusinessCase {
 
     @Override
     public String toString() {
-        return "ID: "+id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject+", Body: "+body;
+        return "ID: "+_id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject+", Body: "+body;
     }
 
     /**
@@ -107,5 +114,14 @@ public abstract class BusinessCase {
      */
     public void setIncomingDate(String incomingDate) {
         this.incomingDate = incomingDate;
+    }
+    
+    public boolean hasCommentWithId(String id){
+        for(Comment c: this.comments){
+            if(c.getId().equals(id)){
+            	return true;
+            }
+        }
+        return false;
     }
 }
