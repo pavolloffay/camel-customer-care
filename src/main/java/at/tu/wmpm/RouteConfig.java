@@ -1,7 +1,7 @@
 package at.tu.wmpm;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+//import java.text.SimpleDateFormat;
+//import java.util.Date;
 
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
@@ -23,6 +23,8 @@ import at.tu.wmpm.model.BusinessCase;
 import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
 import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.FacebookProcessor;
+import at.tu.wmpm.processor.FileAggregationStrategy;
+import at.tu.wmpm.processor.FileProcessor;
 import at.tu.wmpm.processor.MailProcessor;
 import at.tu.wmpm.processor.MongoProcessor;
 import at.tu.wmpm.processor.WireTapLogDropbox;
@@ -62,6 +64,10 @@ public class RouteConfig extends RouteBuilder {
     private WireTapLogTwitter wiretapTwitter;
     @Autowired
     private WireTapLogDropbox wiretapDropbox;
+    @Autowired
+    private FileAggregationStrategy faStrategy;
+    @Autowired
+    private FileProcessor fileProcessor;
 
     @PostConstruct
     public void postConstruct() {
@@ -76,26 +82,28 @@ public class RouteConfig extends RouteBuilder {
 
         JAXBContext jaxbContext = JAXBContext.newInstance(BusinessCase.class);
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
-        String filename = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss")
-                .format(new Date()) + ".xml";
+        // String filename = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss")
+        // .format(new Date()) + ".xml";
 
         // Exception handling
         onException(MailException.class).continued(true).to(
                 "direct:logMailException"); // TODO directly
-                                            // .to(file:logs/excp/logMail) ??
+                                            // .to(file:logs/workingdir/excp/logMail)
+                                            // ??
         onException(FacebookException.class).continued(true).to(
                 "direct:logFacebookException");
         onException(TwitterException.class).continued(true).to(
                 "direct:logTwitterException");
         onException(DropboxLogException.class).continued(true).to(
                 "direct:logDropboxException");
-        from("direct:logMailException").to("file:logs/exceptions/logMail");
+        from("direct:logMailException").to(
+                "file:logs/workingdir/exceptions/logMail?flatten=true");
         from("direct:logFacebookException").to(
-                "file:logs/exceptions/logFacebook");
-        from("direct:logTwitterException")
-                .to("file:logs/exceptions/logTwitter");
-        from("direct:logDropboxException")
-                .to("file:logs/exceptions/logDropbox");
+                "file:logs/workingdir/exceptions/logFacebook?flatten=true");
+        from("direct:logTwitterException").to(
+                "file:logs/workingdir/exceptions/logTwitter?flatten=true");
+        from("direct:logDropboxException").to(
+                "file:logs/workingdir/exceptions/logDropbox?flatten=true");
 
         /**
          * E-Mail Channel
@@ -117,7 +125,8 @@ public class RouteConfig extends RouteBuilder {
                                 + DROPBOX__AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/ex1.xml&remotePath=/XMLExports/M_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
 
-        from("direct:logMail").to("file:logs/wiretap-logs/logMail");
+        from("direct:logMail").to(
+                "file:logs/workingdir/wiretap-logs/logMail?flatten=true");
 
         from("direct:spamChecking")
                 .filter()
@@ -163,7 +172,8 @@ public class RouteConfig extends RouteBuilder {
         // for beans see body().isInstanceOf()
         // .to("direct:spam");
 
-        from("direct:logFacebook").to("file:logs/wiretap-logs/logFacebook");
+        from("direct:logFacebook").to(
+                "file:logs/workingdir/wiretap-logs/logFacebook?flatten=true");
 
         from("direct:facebookToXml")
                 .marshal(jaxbFormat)
@@ -185,13 +195,19 @@ public class RouteConfig extends RouteBuilder {
          * Backup Logs to dropbox every 30 seconds (interval currently set for
          * testing purposes)
          */
-        from("quartz2://LogBackup?cron=0/30+*+*+*+*+?").process(wiretapDropbox);
-        // .to("dropbox://put?"
-        // + DROPBOX__AUTH_PARAMETERS
-        // +
-        // "&uploadMode=add&localPath=logs&remotePath=/logs_${date:now:yyyyMMdd_HH-mm-SS}")
-        // .wireTap("direct:logDropbox", wiretapDropbox);
+        from(
+                "file:logs/workingdir?recursive=true&delete=false&scheduler=quartz2&scheduler.cron=0/30+*+*+*+*+?")
+                .process(fileProcessor)
+                .aggregate(constant(true), faStrategy)
+                .completionFromBatchConsumer()
+                .to("file:logs/forDropbox?fileName=forDropbox.txt")
+                .recipientList(
+                        simple("dropbox://put?"
+                                + DROPBOX__AUTH_PARAMETERS
+                                + "&uploadMode=add&localPath=logs/forDropbox/forDropbox.txt&remotePath=/logs/backup_log_${date:now:yyyyMMdd_HH-mm-SS}.txt"))
+                .wireTap("direct:logDropbox", wiretapDropbox);
 
-        from("direct:logDropbox").to("file:logs/wiretap-logs/logDropbox");
+        from("direct:logDropbox")
+                .to("file:logs/workingdir/wiretap-logs/logDropbox?fileName=upload_log_${date:now:yyyyMMdd_HH-mm-SS}.txt&flatten=true");
     }
 }
