@@ -1,2 +1,0 @@
-UPLOADED_FILE (remote): /logs/backup_log_20150601_12-50-17.txt
-BODY: OK

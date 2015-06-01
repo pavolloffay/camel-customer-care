@@ -7,10 +7,12 @@ import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ import at.tu.wmpm.processor.WireTapLogMail;
 import at.tu.wmpm.processor.WireTapLogTwitter;
 
 import com.mongodb.BasicDBObject;
+
+import facebook4j.Post;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015 edited by johannes on 31.05.2015
@@ -190,9 +194,27 @@ public class RouteConfig extends RouteBuilder {
                 
 	                Morphia morphia = new Morphia();
 	                morphia.map(FacebookBusinessCase.class);
-	                FacebookBusinessCase bc = morphia.fromDBObject(FacebookBusinessCase.class, dbObject);	                
+	                FacebookBusinessCase bc = morphia.fromDBObject(FacebookBusinessCase.class, dbObject);	
                 
-                // do something with the payload and/or exchange here
+	                //exchange.setPattern(ExchangePattern.InOut);
+	                //exchange.getOut().setHeader("CamelFacebook.postId", bc.getFacebookPostId());
+	                //log.debug(ReflectionToStringBuilder.toString(exchange));
+           }
+        }).to("direct:processNewComments");
+        
+        
+        from("direct:processNewComments").to("facebook://getPost?postId=1398676863790958_1404088929916418").process(new Processor() {
+            public void process(Exchange exchange) throws Exception {
+            	
+                log.debug("\n\nFACEBOOK ");
+                log.debug(ReflectionToStringBuilder.toString(exchange));
+                log.debug("\n\n");
+            	
+            	System.out.println(exchange.getIn().getHeaders());
+            
+            	//Post post = (Post)exchange.getIn().getBody();
+            	//System.out.println(post);
+                
            }
         });
         
@@ -208,7 +230,7 @@ public class RouteConfig extends RouteBuilder {
          * Twitter Channel
          */
 
-        from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
+        /*from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
                 + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                 + "accessTokenSecret={{twitter.access.token.secret}}")
                 .wireTap("direct:logTwitter", wiretapTwitter)
@@ -230,7 +252,7 @@ public class RouteConfig extends RouteBuilder {
 
         from("direct:logTwitter")
         .to("file:logs/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-
+		*/
 
         /**
          * TODO remove - just test for google-calendar

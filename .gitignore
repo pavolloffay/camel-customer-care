@@ -1,4 +1,4 @@
-﻿*.class
+*.class
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -61,3 +61,5 @@ activemq-data
 *.epoch
 *.log
 /bin/
+ex2.xml
+forDropbox.txt
