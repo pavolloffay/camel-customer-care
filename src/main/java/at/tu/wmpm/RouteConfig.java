@@ -96,14 +96,14 @@ public class RouteConfig extends RouteBuilder {
                 "direct:logTwitterException");
         onException(DropboxLogException.class).continued(true).to(
                 "direct:logDropboxException");
-        from("direct:logMailException").to(
-                "file:logs/workingdir/exceptions/logMail?flatten=true");
-        from("direct:logFacebookException").to(
-                "file:logs/workingdir/exceptions/logFacebook?flatten=true");
-        from("direct:logTwitterException").to(
-                "file:logs/workingdir/exceptions/logTwitter?flatten=true");
-        from("direct:logDropboxException").to(
-                "file:logs/workingdir/exceptions/logDropbox?flatten=true");
+        from("direct:logMailException")
+                .to("file:logs/workingdir/exceptions/logMail?fileName=exception_mail_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
+        from("direct:logFacebookException")
+                .to("file:logs/workingdir/exceptions/logFacebook?fileName=exception_facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
+        from("direct:logTwitterException")
+                .to("file:logs/workingdir/exceptions/logTwitter?fileName=exception_twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
+        from("direct:logDropboxException")
+                .to("file:logs/workingdir/exceptions/logDropbox?fileName=exception_dropbox_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         /**
          * E-Mail Channel
@@ -125,8 +125,8 @@ public class RouteConfig extends RouteBuilder {
                                 + DROPBOX__AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/ex1.xml&remotePath=/XMLExports/M_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
 
-        from("direct:logMail").to(
-                "file:logs/workingdir/wiretap-logs/logMail?flatten=true");
+        from("direct:logMail")
+                .to("file:logs/workingdir/wiretap-logs/logMail?fileName=mail_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         from("direct:spamChecking")
                 .filter()
@@ -172,8 +172,8 @@ public class RouteConfig extends RouteBuilder {
         // for beans see body().isInstanceOf()
         // .to("direct:spam");
 
-        from("direct:logFacebook").to(
-                "file:logs/workingdir/wiretap-logs/logFacebook?flatten=true");
+        from("direct:logFacebook")
+                .to("file:logs/workingdir/wiretap-logs/logFacebook?fileName=facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         from("direct:facebookToXml")
                 .marshal(jaxbFormat)
@@ -208,6 +208,6 @@ public class RouteConfig extends RouteBuilder {
                 .wireTap("direct:logDropbox", wiretapDropbox);
 
         from("direct:logDropbox")
-                .to("file:logs/workingdir/wiretap-logs/logDropbox?fileName=upload_log_${date:now:yyyyMMdd_HH-mm-SS}.txt&flatten=true");
+                .to("file:logs/workingdir/wiretap-logs/logDropbox?fileName=upload_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
     }
 }
