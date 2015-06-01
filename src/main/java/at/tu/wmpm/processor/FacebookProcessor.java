@@ -1,8 +1,6 @@
 package at.tu.wmpm.processor;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Map;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -13,11 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import facebook4j.Facebook;
-import facebook4j.Post;
 import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.FacebookBusinessCase;
-import at.tu.wmpm.model.MailBusinessCase;
+import facebook4j.Post;
 
 /**
  * Created by pavol on 8.5.2015.
@@ -43,29 +39,30 @@ public class FacebookProcessor implements Processor {
         log.debug("\n\nFACEBOOK");
         log.debug(ReflectionToStringBuilder.toString(exchange));
         log.debug("\n\n");
-        
+
         Message in = exchange.getIn();
-        
+
         Post post = (Post)in.getBody();
-        
+
         /**
          * Set new Business case to exchange message
          */
         FacebookBusinessCase businessCase = new FacebookBusinessCase();
         businessCase.setSender(post.getFrom().getName());
+        businessCase.setIncomingDate(post.getUpdatedTime().toString());
         businessCase.setBody(post.getMessage());
         businessCase.setFacebookUserId(post.getFrom().getId());
         businessCase.setFacebookPostId(post.getId());
-        
- 
+
+
         Comment comment = new Comment();
         comment.setFrom(post.getFrom().getName());
         comment.setMessage(post.getMessage());
         comment.setDate(post.getCreatedTime());
-        
+
         ArrayList<Comment> commentList = new ArrayList<Comment>();
         commentList.add(comment);
-        
+
         if(post.getComments() != null){
             for(facebook4j.Comment c: post.getComments()){
                 Comment newComment = new Comment();
@@ -76,12 +73,12 @@ public class FacebookProcessor implements Processor {
                 commentList.add(newComment);
             }
         }
-        
+
         businessCase.setComments(commentList);
-        
+
         Message message = new DefaultMessage();
         message.setBody(businessCase);
-        
+
         exchange.setOut(message);
     }
 }

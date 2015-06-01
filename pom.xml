@@ -116,6 +116,12 @@
 			<artifactId>camel-google-calendar</artifactId>
 			<version>${camel.version}</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-twitter</artifactId>
+			<version>${camel.version}</version>
+		</dependency>
 
 		<!-- MongoDB -->
 		<dependency>
@@ -142,6 +148,12 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-dropbox</artifactId>
+			<version>2.15.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-quartz2</artifactId>
 			<version>2.15.2</version>
 		</dependency>
 

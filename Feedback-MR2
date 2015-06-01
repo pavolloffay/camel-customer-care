@@ -1,0 +1,19 @@
+Concerning wiretap log mail: don't split & concat -> better in DSL like in slides
+
+set header in mailprocessor - dedicated field for name --> exchange.filenameonly (filename without path)
+
+date in businessmodel+xml --> already done in dropbox branch
+
+why class spamfilter static?
+
+rather bean binding like spamfilter class, not instatiate processors
+
+bean mode: manipulate headers
+
+bean: return body
+
+command queue
+
+json close, comment + text, push to queue, client reads from queue
+
+next MR pre last week in June (Wednesday)

@@ -2,7 +2,9 @@ package at.tu.wmpm.model;
 
 import java.util.ArrayList;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.mongodb.morphia.annotations.Id;
 import org.mongojack.ObjectId;
@@ -23,6 +25,7 @@ public abstract class BusinessCase {
     @JsonProperty("parent_id")
     private String parentId;
     private String sender;
+    private String incomingDate;
     @JsonIgnore
     private boolean isNew;
     private ArrayList<Comment> comments;
@@ -90,5 +93,19 @@ public abstract class BusinessCase {
     @Override
     public String toString() {
         return "ID: "+id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject+", Body: "+body;
+    }
+
+    /**
+     * @return the incomingDate
+     */
+    public String getIncomingDate() {
+        return incomingDate;
+    }
+
+    /**
+     * @param incomingDate the incomingDate to set
+     */
+    public void setIncomingDate(String incomingDate) {
+        this.incomingDate = incomingDate;
     }
 }
