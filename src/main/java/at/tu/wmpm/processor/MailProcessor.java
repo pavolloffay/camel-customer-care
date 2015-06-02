@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.MailBusinessCase;
 
 /**
@@ -22,7 +23,7 @@ import at.tu.wmpm.model.MailBusinessCase;
 public class MailProcessor implements Processor {
 
     private static final Logger log = LoggerFactory.getLogger(MailProcessor.class);
-    private static final Pattern ID_PATTERN = Pattern.compile("(ID:)([a-zA-Z0-9]{3,})");
+    private static final Pattern ID_PATTERN = Pattern.compile("(ID:)([0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12})");
 
     @Override
     public void process(Exchange exchange) throws Exception {
@@ -39,21 +40,34 @@ public class MailProcessor implements Processor {
          */
         MailBusinessCase mailBusinessCase = new MailBusinessCase();
         mailBusinessCase.setSender(inHeaders.get("Return-Path").toString());
-        mailBusinessCase.setBody(inMessageBody);
         mailBusinessCase.setSubject(subject);
         mailBusinessCase.setNew(true);
         mailBusinessCase.setIncomingDate(inHeaders.get("Date").toString());
+        
+        Comment comment = new Comment();
+        comment.setFrom(inHeaders.get("Return-Path").toString());
+        comment.setMessage(inMessageBody);
+        //comment.setDate(inHeaders.get("Date"));
+        
+        mailBusinessCase.addComment(comment);
 
+        Message message = new DefaultMessage();
+       
         Matcher matcher = ID_PATTERN.matcher(subject);
         String parentId = null;
         if (matcher.find()) {
             parentId = matcher.group(2);
-            mailBusinessCase.setNew(false);
         }
-        mailBusinessCase.setParentId(parentId);
-
-        Message message = new DefaultMessage();
-        message.setBody(mailBusinessCase);
+        
+        if(parentId != null){
+        	message.setHeader("hasParent", true);
+        	message.setHeader("parentId", parentId);
+        	message.setHeader("mail", in);
+        	message.setBody(parentId);
+        }else{
+        	message.setBody(mailBusinessCase);
+        }
+       
         exchange.setOut(message);
     }
 }

@@ -19,6 +19,7 @@ public abstract class BusinessCase {
 	
 	public BusinessCase() {
 	    this._id = UUID.randomUUID().toString();
+	    this.comments = new ArrayList<Comment>();
     }
 
 	@Id
@@ -26,7 +27,6 @@ public abstract class BusinessCase {
     @JsonProperty("_id")
     private String _id;
     private String subject;
-    private String body;
     @JsonProperty("parent_id")
     private String parentId;
     private String sender;
@@ -51,14 +51,6 @@ public abstract class BusinessCase {
 
     public void setSubject(String subject) {
         this.subject = subject;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
     }
 
     public String getParentId() {
@@ -99,7 +91,7 @@ public abstract class BusinessCase {
 
     @Override
     public String toString() {
-        return "ID: "+_id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject+", Body: "+body;
+        return "ID: "+_id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject;
     }
 
     /**

@@ -50,7 +50,6 @@ public class FacebookProcessor implements Processor {
         FacebookBusinessCase businessCase = new FacebookBusinessCase();
         businessCase.setSender(post.getFrom().getName());
         businessCase.setIncomingDate(post.getUpdatedTime().toString());
-        businessCase.setBody(post.getMessage());
         businessCase.setFacebookUserId(post.getFrom().getId());
         businessCase.setFacebookPostId(post.getId());
 

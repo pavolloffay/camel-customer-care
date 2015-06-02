@@ -32,7 +32,6 @@ public class TwitterProcessor implements Processor {
 
         tBC.setSender(status.getUser().getName());
         tBC.setIncomingDate(status.getCreatedAt().toString());
-        tBC.setBody(status.getText());
         tBC.setTweetID(status.getId());
 
         Message tweets = new DefaultMessage();

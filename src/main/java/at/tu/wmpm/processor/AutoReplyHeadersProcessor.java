@@ -34,7 +34,7 @@ public class AutoReplyHeadersProcessor implements Processor {
         Message outMessage = new DefaultMessage();
         outMessage.setBody(mailBusinessCase);
         outMessage.setHeaders(prepareOutHeaders(mailBusinessCase));
-        outMessage.setHeader("CamelVelocityContext", getVelocityContext(mailBusinessCase.getBody()));
+        outMessage.setHeader("CamelVelocityContext", getVelocityContext(mailBusinessCase.getComments().get(0).getMessage()));
         exchange.setOut(outMessage);
     }
 
