@@ -49,7 +49,8 @@ import com.mongodb.BasicDBObject;
 import facebook4j.Post;
 
 /**
- * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015 edited by johannes on 31.05.2015
+ * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015 edited by
+ * johannes on 31.05.2015
  */
 public class RouteConfig extends RouteBuilder {
 
@@ -197,14 +198,16 @@ public class RouteConfig extends RouteBuilder {
         from("direct:logFacebook")
                 .to("file:logs/workingdir/wiretap-logs/logFacebook?fileName=facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
-        from("timer://commentfetch?fixedRate=true&period=10000").to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll").split(body()).process(mongoDbProcessor).to("direct:processNewComments");
-        
-        
+        from("timer://commentfetch?fixedRate=true&period=10000")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll")
+                .split(body()).process(mongoDbProcessor)
+                .to("direct:processNewComments");
+
         from("direct:processNewComments")
-        		.to("facebook://post?postId=seeHeader")
-        		.process(facebookUpdatePostProcessor)
-        		.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
-        
+                .to("facebook://post?postId=seeHeader")
+                .process(facebookUpdatePostProcessor)
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
+
         from("direct:facebookToXml")
                 .marshal(jaxbFormat)
                 .setHeader(Exchange.FILE_NAME, constant("ex2.xml"))
@@ -217,9 +220,10 @@ public class RouteConfig extends RouteBuilder {
          * Twitter Channel
          */
 
-        from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
-                + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
-                + "accessTokenSecret={{twitter.access.token.secret}}")
+        from(
+                "twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
+                        + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
+                        + "accessTokenSecret={{twitter.access.token.secret}}")
                 .wireTap("direct:logTwitter", wiretapTwitter)
                 .process(twitterProcessor)
                 .multicast()
@@ -238,8 +242,7 @@ public class RouteConfig extends RouteBuilder {
                 .wireTap("direct:logDropbox", wiretapDropbox);
 
         from("direct:logTwitter")
-        .to("file:logs/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-		
+                .to("file:logs/workingdir/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         /**
          * TODO remove - just test for google-calendar
@@ -266,6 +269,5 @@ public class RouteConfig extends RouteBuilder {
 
         from("direct:logDropbox")
                 .to("file:logs/workingdir/wiretap-logs/logDropbox?fileName=upload_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-
     }
 }
