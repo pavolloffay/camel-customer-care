@@ -27,8 +27,6 @@ import at.tu.wmpm.exception.MailException;
 import at.tu.wmpm.exception.TwitterException;
 import at.tu.wmpm.filter.SpamFilter;
 import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.model.Comment;
-import at.tu.wmpm.model.FacebookBusinessCase;
 import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
 import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.FacebookProcessor;
@@ -43,10 +41,6 @@ import at.tu.wmpm.processor.WireTapLogDropbox;
 import at.tu.wmpm.processor.WireTapLogFacebook;
 import at.tu.wmpm.processor.WireTapLogMail;
 import at.tu.wmpm.processor.WireTapLogTwitter;
-
-import com.mongodb.BasicDBObject;
-
-import facebook4j.Post;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015 edited by
@@ -134,22 +128,23 @@ public class RouteConfig extends RouteBuilder {
         from(
                 "pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
                 .wireTap("direct:logMail", wiretapMail)
-                // .process(mailTranslator)
                 .process(mailProcessor)
+                .filter()
+                .method(SpamFilter.class, "isNoSpam")
                 .choice()
                 .when(header("hasParent").isEqualTo(true))
                 .to("direct:mailUpdateComment")
                 .otherwise()
                 .multicast()
                 .parallelProcessing()
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert", "direct:autoReplyEmail");
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert", "direct:autoReplyEmail", "direct:addToCalendar", "direct:storeXMLEmail");
                 
         from("direct:mailUpdateComment")
         		.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findById")
         		.process(mailUpdateProcessor)
         		.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
 
-        /*from("direct:storeXMLEmail")
+        from("direct:storeXMLEmail")
                 .marshal(jaxbFormat)
                 .setHeader(Exchange.FILE_NAME, constant("ex1.xml"))
                 .to("file:logs/XMLExports?autoCreate=true")
@@ -161,20 +156,7 @@ public class RouteConfig extends RouteBuilder {
         from("direct:logMail")
                 .to("file:logs/workingdir/wiretap-logs/logMail?fileName=mail_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
-        from("direct:spamChecking")
-                .filter()
-                .method(SpamFilter.class, "isNoSpam")
-                // store to DB, load parent
-                .process(mongoProcessor)
-                .choice()
-                .when(body(BusinessCase.class).method("isNew").isEqualTo(true))
-                .setHeader("Subject", body(BusinessCase.class).method("getId"))
-                .multicast()
-                .parallelProcessing()
-                .to("direct:autoReplyEmail", "direct:addToCalendar",
-                        "direct:storeXMLEmail").endChoice().otherwise()
-                .to("direct:addToCalendar");
-*/
+
         from("direct:autoReplyEmail")
                 .process(autoReplyHeadersProcessor)
                 .to("velocity:mail-templates/auto-reply.vm")
@@ -184,9 +166,8 @@ public class RouteConfig extends RouteBuilder {
         /**
          * add calendar events for employees forward event for employees
          */
- /*       from("direct:addToCalendar").process(calendarProcessor);
+       from("direct:addToCalendar").process(calendarProcessor);
         // //.to("google-calendar:createNewEvent")
-*/
         /**
          * process for care center employees from(direct:careCenter).to(smtp
          * send email)
@@ -195,7 +176,7 @@ public class RouteConfig extends RouteBuilder {
         /**
          * Facebook Channel
          */
-/*        from(
+        from(
                 "facebook://getTagged?reading.since=1.1.2015&userId={{facebook.page.id}}&consumer.delay=10000")
                 .process(facebookProcessor)
                 .multicast()
@@ -227,11 +208,11 @@ public class RouteConfig extends RouteBuilder {
                         simple("dropbox://put?"
                                 + DROPBOX__AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/ex2.xml&remotePath=/XMLExports/FB_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
-*/        /**
+         /**
          * Twitter Channel
          */
 
- /*       from(
+        from(
                 "twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
@@ -254,19 +235,19 @@ public class RouteConfig extends RouteBuilder {
 
         from("direct:logTwitter")
                 .to("file:logs/workingdir/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-*/
+
         /**
          * TODO remove - just test for google-calendar
          */
-/*        from(
+        from(
                 "google-calendar://calendars/get?calendarId={{google.calendar.id}}")
                 .process(calendarProcessor);
-*/
+
         /**
          * Backup Logs to dropbox every 30 seconds (interval currently set for
          * testing purposes)
          */
- /*       from(
+        from(
                 "file:logs/workingdir?recursive=true&delete=false&scheduler=quartz2&scheduler.cron=0/30+*+*+*+*+?")
                 .process(fileProcessor)
                 .aggregate(constant(true), faStrategy)
@@ -280,6 +261,6 @@ public class RouteConfig extends RouteBuilder {
 
         from("direct:logDropbox")
                 .to("file:logs/workingdir/wiretap-logs/logDropbox?fileName=upload_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-*/
+
     }
 }

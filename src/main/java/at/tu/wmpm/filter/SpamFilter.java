@@ -17,10 +17,10 @@ public class SpamFilter {
 
     public static boolean isNoSpam(@Body BusinessCase body, @Header("Return-Path") String from) {
 
-        /*if (body.getBody().contains("spam")) {
+        if (body.getComments().toString().contains("spam")) {
             log.info("spam from:{}, body:\n{}", from, body);
             return false;
-        }*/
+        }
 
         return true;
     }
