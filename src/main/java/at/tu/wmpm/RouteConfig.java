@@ -204,7 +204,7 @@ public class RouteConfig extends RouteBuilder {
                 .to("direct:processNewComments");
 
         from("direct:processNewComments")
-                .to("facebook://post?postId=seeHeader")
+                .to("facebook://post?postId="+header("FacebookCamel.postId"))
                 .process(facebookUpdatePostProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
 
