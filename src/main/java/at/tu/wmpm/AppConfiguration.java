@@ -90,12 +90,11 @@ public class AppConfiguration extends CamelConfiguration {
     public GoogleCalendarComponent googleCalendarComponent() throws Exception {
         GoogleCalendarComponent googleCalendarComponent = new GoogleCalendarComponent();
         googleCalendarComponent.setConfiguration(googleCalendarConfiguration());
-//        googleCalendarComponent.setCamelContext(camelContext()); // not necessary
 
         return googleCalendarComponent;
     }
 
-    // spring @Value
+    // spring @Value support
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeHolderConfigurer() {
         return new PropertySourcesPlaceholderConfigurer();
