@@ -1,21 +1,12 @@
 package at.tu.wmpm;
 
-//import java.text.SimpleDateFormat;
-//import java.util.Date;
 
-import javax.activation.DataHandler;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.ExchangePattern;
-import org.apache.camel.Message;
-import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
-import org.apache.camel.impl.DefaultMessage;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +32,15 @@ import at.tu.wmpm.processor.WireTapLogDropbox;
 import at.tu.wmpm.processor.WireTapLogFacebook;
 import at.tu.wmpm.processor.WireTapLogMail;
 import at.tu.wmpm.processor.WireTapLogTwitter;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by pavol on 30.04.2015 Edited by christian on 19.05.2015 edited by
  * johannes on 31.05.2015
  */
+@Component
+@DependsOn({"google-calendar", "facebookConfiguration"})
 public class RouteConfig extends RouteBuilder {
 
     private static final Logger log = LoggerFactory
@@ -125,24 +120,27 @@ public class RouteConfig extends RouteBuilder {
         /**
          * E-Mail Channel
          */
-        from(
-                "pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
+        from("pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
                 .wireTap("direct:logMail", wiretapMail)
                 .process(mailProcessor)
-                .filter()
-                .method(SpamFilter.class, "isNoSpam")
+                .filter().method(SpamFilter.class, "isNoSpam")
                 .choice()
-                .when(header("hasParent").isEqualTo(true))
-                .to("direct:mailUpdateComment")
-                .otherwise()
-                .multicast()
-                .parallelProcessing()
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert", "direct:autoReplyEmail", "direct:addToCalendar", "direct:storeXMLEmail");
+                    .when(header("hasParent").isEqualTo(true))
+                        .to("direct:mailUpdateComment")
+                    .otherwise()
+                        .multicast()
+                        .parallelProcessing()
+                        .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
+                                "direct:autoReplyEmail",
+                                "direct:addToCalendar",
+                                "direct:storeXMLEmail")
+                .end();
                 
         from("direct:mailUpdateComment")
-        		.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findById")
-        		.process(mailUpdateProcessor)
-        		.to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
+                .transform(body(BusinessCase.class).method("getParentId"))
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findById")
+                .process(mailUpdateProcessor)
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
 
         from("direct:storeXMLEmail")
                 .marshal(jaxbFormat)
@@ -166,7 +164,10 @@ public class RouteConfig extends RouteBuilder {
         /**
          * add calendar events for employees forward event for employees
          */
-       from("direct:addToCalendar").process(calendarProcessor);
+//       from("direct:addToCalendar").process(calendarProcessor);
+        from("direct:addToCalendar")
+                .process(calendarProcessor)
+                .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
         // //.to("google-calendar:createNewEvent")
         /**
          * process for care center employees from(direct:careCenter).to(smtp
@@ -232,16 +233,10 @@ public class RouteConfig extends RouteBuilder {
                                 + DROPBOX__AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/twitter_ex.xml&remotePath=/XMLExports/Twitter_${date:now:yyyyMMdd_HH-mm-SS}.xml"))
                 .wireTap("direct:logDropbox", wiretapDropbox);
-
+//
         from("direct:logTwitter")
                 .to("file:logs/workingdir/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
-        /**
-         * TODO remove - just test for google-calendar
-         */
-        from(
-                "google-calendar://calendars/get?calendarId={{google.calendar.id}}")
-                .process(calendarProcessor);
 
         /**
          * Backup Logs to dropbox every 30 seconds (interval currently set for

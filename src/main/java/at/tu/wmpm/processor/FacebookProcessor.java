@@ -35,13 +35,9 @@ public class FacebookProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-
-        //log.debug("\n\nFACEBOOK");
         //log.debug(ReflectionToStringBuilder.toString(exchange));
-        //log.debug("\n\n");
 
         Message in = exchange.getIn();
-
         Post post = (Post)in.getBody();
 
         /**

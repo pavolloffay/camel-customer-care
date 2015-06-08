@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.mongodb.morphia.annotations.Id;
-import org.mongojack.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,14 +15,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class BusinessCase {
-	
-	public BusinessCase() {
-	    this._id = UUID.randomUUID().toString();
-	    this.comments = new ArrayList<Comment>();
+
+    public BusinessCase() {
+        this._id = UUID.randomUUID().toString();
+        this.comments = new ArrayList<Comment>();
     }
 
-	@Id
-    @ObjectId
+    @Id
     @JsonProperty("_id")
     private String _id;
     private String subject;
@@ -36,7 +34,6 @@ public abstract class BusinessCase {
     private ArrayList<Comment> comments;
     
      
-
     public boolean isNew() {
         return isNew;
     }
@@ -111,7 +108,7 @@ public abstract class BusinessCase {
     public boolean hasCommentWithId(String id){
         for(Comment c: this.comments){
             if(c.getId().equals(id)){
-            	return true;
+                return true;
             }
         }
         return false;

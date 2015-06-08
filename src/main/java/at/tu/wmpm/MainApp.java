@@ -1,8 +1,7 @@
 package at.tu.wmpm;
 
 import org.apache.camel.spring.Main;
-
-import java.util.Collections;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
  * App used to run from IDE,
@@ -11,14 +10,17 @@ import java.util.Collections;
 public class MainApp {
 
     public static void main(String[] args) throws Exception {
+
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfiguration.class);
+
         Main main = new Main();
-        main.setFileApplicationContextUri("classpath*:camel-context.xml");
+        main.setApplicationContext(context);
         main.enableHangupSupport();
 
         /**
          * Run - all configuration is done in camel-context.xml
          * not passing arguments
          */
-        main.run(Collections.emptyList().toArray(new String[0]));
+        main.run(new String[0]);
     }
 }

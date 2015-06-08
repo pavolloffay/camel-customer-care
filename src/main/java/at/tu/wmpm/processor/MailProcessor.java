@@ -28,46 +28,49 @@ public class MailProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         log.debug(ReflectionToStringBuilder.toString(exchange));
-
         Message in = exchange.getIn();
-        Map<String, Object> inHeaders = in.getHeaders();
         String inMessageBody = in.getBody(String.class);
-        String subject = inHeaders.get("Subject").toString();
+        String subject = in.getHeaders().get("Subject").toString();
         log.debug("\n\nMail body:\n" + inMessageBody + "\n");
 
         /**
-         * Set new Business case to exchange message
+         * Transform message body to model object
          */
-        MailBusinessCase mailBusinessCase = new MailBusinessCase();
-        mailBusinessCase.setSender(inHeaders.get("Return-Path").toString());
-        mailBusinessCase.setSubject(subject);
-        mailBusinessCase.setNew(true);
-        mailBusinessCase.setIncomingDate(inHeaders.get("Date").toString());
-        
-        Comment comment = new Comment();
-        comment.setFrom(inHeaders.get("Return-Path").toString());
-        comment.setMessage(inMessageBody);
-        //comment.setDate(inHeaders.get("Date"));
-        
+        Comment comment = getComment(in.getHeaders(), inMessageBody);
+        MailBusinessCase mailBusinessCase = getMailBusinessCase(in.getHeaders());
         mailBusinessCase.addComment(comment);
 
-        Message message = new DefaultMessage();
-       
         Matcher matcher = ID_PATTERN.matcher(subject);
-        String parentId = null;
         if (matcher.find()) {
-            parentId = matcher.group(2);
+            mailBusinessCase.setParentId(matcher.group(2));
         }
-        
-        if(parentId != null){
-        	message.setHeader("hasParent", true);
-        	message.setHeader("parentId", parentId);
-        	message.setHeader("mail", in);
-        	message.setBody(parentId);
-        }else{
-        	message.setBody(mailBusinessCase);
+
+        Message message = new DefaultMessage();
+
+        if(mailBusinessCase.getParentId() != null){
+            message.setHeader("hasParent", true);
+            message.setHeader("comment", comment);
         }
-       
+
+        message.setBody(mailBusinessCase);
         exchange.setOut(message);
+    }
+
+    private MailBusinessCase getMailBusinessCase(Map<String, Object> headers) {
+        MailBusinessCase mailBusinessCase = new MailBusinessCase();
+        mailBusinessCase.setSender(headers.get("Return-Path").toString());
+        mailBusinessCase.setSubject(headers.get("Subject").toString());
+        mailBusinessCase.setIncomingDate(headers.get("Date").toString());
+        mailBusinessCase.setNew(true);
+
+        return mailBusinessCase;
+    }
+
+    private Comment getComment(Map<String, Object> headers, String messageBody) {
+        Comment comment = new Comment();
+        comment.setFrom(headers.get("Return-Path").toString());
+        comment.setMessage(messageBody);
+
+        return comment;
     }
 }
