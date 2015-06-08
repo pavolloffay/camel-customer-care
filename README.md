@@ -6,7 +6,7 @@ Application demonstrates usage of multiple Apache Camel EIP & Components
 
 
 ### Run
-* `mvn camel:run`
+* `mvn exec:java`
 
 ### Documentation
 * [Documentation](https://www.sharelatex.com)
@@ -24,3 +24,9 @@ Application demonstrates usage of multiple Apache Camel EIP & Components
 
 ### Tutor
  * lucasgerrand@gmail.com
+ 
+ 
+### Testing 
+ * Email - send email to customer.care.tu.wien@gmail.com, you will get an auto reply. If you reply to autoreply there will be new item(comment) in business case in mongoDB.
+ * Facebook - post to https://www.facebook.com/area51customercare
+
