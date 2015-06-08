@@ -7,7 +7,6 @@ package at.tu.wmpm.exception;
  */
 public class TwitterException extends Exception {
 
-
     public TwitterException() {
     }
 

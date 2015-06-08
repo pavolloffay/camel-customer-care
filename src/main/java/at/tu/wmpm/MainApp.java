@@ -4,8 +4,8 @@ import org.apache.camel.spring.Main;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 /**
- * App used to run from IDE,
- * from command line use mvn camel:run
+ * Customer care main App
+ *
  */
 public class MainApp {
 

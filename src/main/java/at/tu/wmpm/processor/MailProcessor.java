@@ -28,6 +28,7 @@ public class MailProcessor implements Processor {
     @Override
     public void process(Exchange exchange) throws Exception {
         log.debug(ReflectionToStringBuilder.toString(exchange));
+
         Message in = exchange.getIn();
         String inMessageBody = in.getBody(String.class);
         String subject = in.getHeaders().get("Subject").toString();

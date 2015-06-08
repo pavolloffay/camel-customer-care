@@ -43,16 +43,13 @@ public class MongoDbBusinessCaseProcessor implements Processor {
         
             Morphia morphia = new Morphia();
             morphia.map(FacebookBusinessCase.class);
-            FacebookBusinessCase bc = morphia.fromDBObject(FacebookBusinessCase.class, dbObject);	
+            FacebookBusinessCase bc = morphia.fromDBObject(FacebookBusinessCase.class, dbObject);
         
             exchange.setPattern(ExchangePattern.InOut);
             Message m = exchange.getOut();
             if(bc.getFacebookPostId() != null){
-            	m.setHeader("CamelFacebook.postId", bc.getFacebookPostId());
-            	m.setHeader("bc", bc);
+                m.setHeader("CamelFacebook.postId", bc.getFacebookPostId());
+                m.setHeader("bc", bc);
             }
-            	                //log.debug(ReflectionToStringBuilder.toString(exchange));
    }
-
-
 }
