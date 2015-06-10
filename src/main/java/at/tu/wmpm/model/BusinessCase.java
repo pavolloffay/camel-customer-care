@@ -32,8 +32,8 @@ public abstract class BusinessCase {
     @JsonIgnore
     private boolean isNew;
     private ArrayList<Comment> comments;
-    
-     
+
+
     public boolean isNew() {
         return isNew;
     }
@@ -91,6 +91,10 @@ public abstract class BusinessCase {
         return "ID: "+_id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject;
     }
 
+    public String getLastMessage() {
+        return comments.get(comments.size()-1).getMessage();
+    }
+
     /**
      * @return the incomingDate
      */
@@ -104,7 +108,7 @@ public abstract class BusinessCase {
     public void setIncomingDate(String incomingDate) {
         this.incomingDate = incomingDate;
     }
-    
+
     public boolean hasCommentWithId(String id){
         for(Comment c: this.comments){
             if(c.getId().equals(id)){

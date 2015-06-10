@@ -1,9 +1,7 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.TwitterProcessor;
-import at.tu.wmpm.processor.WireTapLogDropbox;
-import at.tu.wmpm.processor.WireTapLogTwitter;
+import javax.xml.bind.JAXBContext;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -13,7 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.CalendarProcessor;
+import at.tu.wmpm.processor.TwitterProcessor;
+import at.tu.wmpm.processor.WireTapLogDropbox;
+import at.tu.wmpm.processor.WireTapLogTwitter;
 
 /**
  * Created by pavol on 8.6.2015.
@@ -49,7 +51,7 @@ public class TwitterRoute extends RouteBuilder {
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
-                        "direct:twitterToXml");
+                        "direct:twitterToXml"/*, "direct:addToTWCalendar"*/);
 
 
         from("direct:twitterToXml")
@@ -64,5 +66,10 @@ public class TwitterRoute extends RouteBuilder {
 
         from("direct:logTwitter")
                 .to("file:logs/workingdir/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
+
+
+        from("direct:addToTWCalendar")
+            .bean(CalendarProcessor.class, "process")
+            .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
     }
 }

@@ -1,8 +1,7 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.filter.SpamFilter;
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.*;
+import javax.xml.bind.JAXBContext;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -13,7 +12,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
+import at.tu.wmpm.filter.SpamFilter;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
+import at.tu.wmpm.processor.CalendarProcessor;
+import at.tu.wmpm.processor.MailProcessor;
+import at.tu.wmpm.processor.MailUpdateCommentsProcessor;
+import at.tu.wmpm.processor.WireTapLogMail;
 
 /**
  * Created by pavol on 8.6.2015.
@@ -78,7 +83,7 @@ public class MailRoute extends RouteBuilder {
                 .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}");
 
         from("direct:addToCalendar")
-                .process(calendarProcessor)
+                .bean(CalendarProcessor.class, "process")
                 .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
 
         from("direct:storeXMLEmail")

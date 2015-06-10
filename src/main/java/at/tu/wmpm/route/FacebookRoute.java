@@ -1,9 +1,7 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.FacebookProcessor;
-import at.tu.wmpm.processor.FacebookUpdatePostProcessor;
-import at.tu.wmpm.processor.MongoDbBusinessCaseProcessor;
+import javax.xml.bind.JAXBContext;
+
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -13,9 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
-import javax.xml.bind.JAXBContext;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.CalendarProcessor;
+import at.tu.wmpm.processor.FacebookProcessor;
+import at.tu.wmpm.processor.FacebookUpdatePostProcessor;
+import at.tu.wmpm.processor.MongoDbBusinessCaseProcessor;
 
 /**
  * Created by pavol on 8.6.2015.
@@ -48,7 +49,7 @@ public class FacebookRoute extends RouteBuilder {
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
-                        "direct:facebookToXml");
+                        "direct:facebookToXml"/*, "direct:addToFBCalendar"*/);
 
 
         from("direct:logFacebook")
@@ -72,5 +73,10 @@ public class FacebookRoute extends RouteBuilder {
                         simple("dropbox://put?"
                                 + DROPBOX_AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/ex2.xml&remotePath=/XMLExports/FB_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
+
+        from("direct:addToFBCalendar")
+            .bean(CalendarProcessor.class, "process")
+            .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
+
     }
 }
