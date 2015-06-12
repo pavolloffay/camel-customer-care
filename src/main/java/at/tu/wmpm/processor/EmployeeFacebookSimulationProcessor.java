@@ -1,30 +1,18 @@
 package at.tu.wmpm.processor;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.camel.Body;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.impl.DefaultMessage;
 import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.FacebookBusinessCase;
-import at.tu.wmpm.model.MailBusinessCase;
-import at.tu.wmpm.model.TwitterBusinessCase;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
-import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 @Configuration
@@ -33,7 +21,29 @@ public class EmployeeFacebookSimulationProcessor {
     private static final Logger log = LoggerFactory
             .getLogger(EmployeeFacebookSimulationProcessor.class);
 
-    public void process(Exchange e) throws Exception {
+    public void commentOnFacebookBusinessCase(Exchange e) throws Exception {
+        String fbMessage = "Have you tried turning it off and on again? ;-)";
+
+        Message m = addComment(e, fbMessage);
+
+        if (null == m) {
+            throw new Exception("An error occured while processing message.");
+        }
+    }
+
+    public void closeFacebookBusinessCase(Exchange e) throws Exception {
+        String fbMessage = "Your ticket was successfully processed and is being closed now. Thank you for your patience. Have a nice day :-)";
+        Message m = addComment(e, fbMessage);
+
+        if (null == m) {
+            throw new Exception("An error occured while processing message.");
+        }
+
+        // TODO Think about the reasonableness of closing a FacebookBusinessCase
+        // (deleting a post) and therefore implement next steps
+    }
+
+    public Message addComment(Exchange e, String message) throws Exception {
 
         @SuppressWarnings("unchecked")
         List<DBObject> DBObjectList = e.getIn().getMandatoryBody(
@@ -54,7 +64,7 @@ public class EmployeeFacebookSimulationProcessor {
                     + " DBObjects according to list");
 
         if (null != DBObjectList) {
-            businessCaseList = generateBusinessCases(DBObjectList);
+            businessCaseList = generateFacebookBusinessCases(DBObjectList);
 
             if (null != businessCaseList) {
                 if (!businessCaseList.isEmpty()) {
@@ -64,10 +74,9 @@ public class EmployeeFacebookSimulationProcessor {
                             + chosenBusinessCase.getId());
 
                     if (chosenBusinessCase.getFacebookPostId() != null) {
-                        fbMessage = "Dear "
-                                + chosenBusinessCase.getSender()
-                                + "\n"
-                                + "Have you tried turning it off and on again? ;-)";
+                        fbMessage = "Dear " + chosenBusinessCase.getSender()
+                                + "\n" + message + "\n\n" + "Yours sincerely,"
+                                + "\n" + "The IT Crowd";
                         log.info(fbMessage);
 
                         m = e.getOut();
@@ -75,18 +84,17 @@ public class EmployeeFacebookSimulationProcessor {
                                 chosenBusinessCase.getFacebookPostId());
                         m.setHeader("CamelFacebook.message", fbMessage);
                         m.setHeader("bc", chosenBusinessCase);
+
+                        return m;
                     }
                 }
             }
         }
 
-        // in.setHeader("CamelGoogleCalendar.content",
-        // (com.google.api.services.calendar.model.Event) event);
-        // in.setBody((com.google.api.services.calendar.model.Event) event);
-        // e.setOut(in);
+        return null;
     }
 
-    private List<FacebookBusinessCase> generateBusinessCases(
+    private List<FacebookBusinessCase> generateFacebookBusinessCases(
             List<DBObject> DBObjectList) {
         Morphia morphia = new Morphia();
         morphia.map(FacebookBusinessCase.class);
