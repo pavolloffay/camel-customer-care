@@ -39,8 +39,6 @@ public class MailRoute extends RouteBuilder {
     @Autowired
     private WireTapLogMail wiretapMail;
     @Autowired
-    private AutoReplyHeadersProcessor autoReplyHeadersProcessor;
-    @Autowired
     private CalendarProcessor calendarProcessor;
 
 
@@ -52,7 +50,7 @@ public class MailRoute extends RouteBuilder {
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
         from("pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
-                .wireTap("direct:logMail", wiretapMail)
+                .wireTap("seda:logMail", wiretapMail)
                 .process(mailProcessor)
                 .filter().method(SpamFilter.class, "isNoSpam")
                 .choice()
@@ -64,7 +62,7 @@ public class MailRoute extends RouteBuilder {
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
                         "direct:autoReplyEmail",
                         "direct:addToCalendar",
-                        "direct:storeXMLEmail")
+                        "seda:storeXMLEmail")
                 .end();
 
 
@@ -74,11 +72,11 @@ public class MailRoute extends RouteBuilder {
                 .process(mailUpdateProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
 
-        from("direct:logMail")
+        from("seda:logMail?concurrentConsumers=3")
                 .to("file:logs/workingdir/wiretap-logs/logMail?fileName=mail_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         from("direct:autoReplyEmail")
-                .process(autoReplyHeadersProcessor)
+                .bean(AutoReplyHeadersProcessor.class, "process")
                 .to("velocity:mail-templates/auto-reply.vm")
                 .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}");
 
@@ -86,7 +84,7 @@ public class MailRoute extends RouteBuilder {
                 .bean(CalendarProcessor.class, "process")
                 .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
 
-        from("direct:storeXMLEmail")
+        from("seda:storeXMLEmail?concurrentConsumers=3")
                 .marshal(jaxbFormat)
                 .setHeader(Exchange.FILE_NAME, constant("ex1.xml"))
                 .to("file:logs/XMLExports?autoCreate=true")

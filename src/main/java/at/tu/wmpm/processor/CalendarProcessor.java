@@ -26,7 +26,7 @@ public class CalendarProcessor {
         Message in = new DefaultMessage();
         com.google.api.services.calendar.model.Event event = new Event()
                 .setSummary(body.getSender()+": "+body.getId())
-                .setDescription(body.toString()+", Message: "+body.getLastMessage()); //TODO also write mail body into description
+                .setDescription(body.toString()+", Message: "+body.getLastMessage());
 
         DateTime startDateTime = new DateTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(((long)new Date().getTime())-(120*60000)+(5*60000)));
         EventDateTime start = new EventDateTime()

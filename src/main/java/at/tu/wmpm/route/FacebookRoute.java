@@ -49,7 +49,7 @@ public class FacebookRoute extends RouteBuilder {
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
-                        "direct:facebookToXml"/*, "direct:addToFBCalendar"*/);
+                        "seda:facebookToXml"/*, "direct:addToFBCalendar"*/);
 
 
         from("direct:logFacebook")
@@ -65,7 +65,7 @@ public class FacebookRoute extends RouteBuilder {
                 .process(facebookUpdatePostProcessor)
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
 
-        from("direct:facebookToXml")
+        from("seda:facebookToXml?concurrentConsumers=3")
                 .marshal(jaxbFormat)
                 .setHeader(Exchange.FILE_NAME, constant("ex2.xml"))
                 .to("file:logs/XMLExports?autoCreate=true")

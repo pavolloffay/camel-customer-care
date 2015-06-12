@@ -51,10 +51,10 @@ public class TwitterRoute extends RouteBuilder {
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
-                        "direct:twitterToXml"/*, "direct:addToTWCalendar"*/);
+                        "seda:twitterToXml", "direct:addToTWCalendar");
 
 
-        from("direct:twitterToXml")
+        from("seda:twitterToXml?concurrentConsumers=3")
                 .marshal(jaxbFormat)
                 .setHeader(Exchange.FILE_NAME, constant("twitter_ex.xml"))
                 .to("file:logs/XMLExports?autoCreate=true")
