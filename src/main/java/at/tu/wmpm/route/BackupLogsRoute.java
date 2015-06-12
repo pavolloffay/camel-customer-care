@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * Created by pavol on 8.6.2015.
  */
 @Component
-public class DropboxRoute extends RouteBuilder {
+public class BackupLogsRoute extends RouteBuilder {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionRoute.class);
 
