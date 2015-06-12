@@ -51,7 +51,7 @@ public class TwitterRoute extends RouteBuilder {
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
-                        "seda:twitterToXml", "direct:addToTWCalendar");
+                        "seda:twitterToXml"/*, "direct:addToTWCalendar"*/);
 
 
         from("seda:twitterToXml?concurrentConsumers=3")

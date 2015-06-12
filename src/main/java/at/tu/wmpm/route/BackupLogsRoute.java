@@ -1,15 +1,15 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.processor.FileAggregationStrategy;
-import at.tu.wmpm.processor.FileProcessor;
-import at.tu.wmpm.processor.WireTapLogDropbox;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
+import at.tu.wmpm.processor.FileAggregationStrategy;
+import at.tu.wmpm.processor.FileProcessor;
+import at.tu.wmpm.processor.WireTapLogDropbox;
 
 /**
  * Created by pavol on 8.6.2015.
@@ -48,9 +48,9 @@ public class BackupLogsRoute extends RouteBuilder {
                         simple("dropbox://put?"
                                 + DROPBOX_AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/forDropbox/forDropbox.txt&remotePath=/logs/backup_log_${date:now:yyyyMMdd_HH-mm-SS}.txt"))
-                .wireTap("direct:logDropbox", wiretapDropbox);
+                .wireTap("seda:logDropbox", wiretapDropbox);
 
-        from("direct:logDropbox")
+        from("seda:logDropbox?concurrentConsumers=3")
                 .to("file:logs/workingdir/wiretap-logs/logDropbox?fileName=upload_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
     }
 }
