@@ -59,7 +59,7 @@ public class MailRoute extends RouteBuilder {
                 .otherwise()
                 .multicast()
                 .parallelProcessing()
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=insert",
                         "direct:autoReplyEmail",
                         "direct:addToCalendar",
                         "seda:storeXMLEmail")
@@ -68,9 +68,9 @@ public class MailRoute extends RouteBuilder {
 
         from("direct:mailUpdateComment")
                 .transform(body(BusinessCase.class).method("getParentId"))
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findById")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=findById")
                 .process(mailUpdateProcessor)
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=save");
 
         from("seda:logMail?concurrentConsumers=3")
                 .to("file:logs/workingdir/wiretap-logs/logMail?fileName=mail_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");

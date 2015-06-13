@@ -48,7 +48,7 @@ public class FacebookRoute extends RouteBuilder {
                 .process(facebookProcessor)
                 .multicast()
                 .parallelProcessing()
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=insert",
                         "seda:facebookToXml"/*, "direct:addToFBCalendar"*/);
 
 
@@ -56,14 +56,14 @@ public class FacebookRoute extends RouteBuilder {
                 .to("file:logs/workingdir/wiretap-logs/logFacebook?fileName=facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         from("timer://commentfetch?fixedRate=true&period=10000")
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=findAll")
                 .split(body()).process(mongoDbProcessor)
                 .to("direct:processNewComments");
 
         from("direct:processNewComments")
                 .to("facebook://post?postId="+header("FacebookCamel.postId"))
                 .process(facebookUpdatePostProcessor)
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=save");
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=save");
 
         from("seda:facebookToXml?concurrentConsumers=3")
                 .marshal(jaxbFormat)

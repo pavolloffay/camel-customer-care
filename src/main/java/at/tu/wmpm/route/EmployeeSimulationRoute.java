@@ -1,6 +1,5 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.processor.CalendarProcessor;
 import at.tu.wmpm.processor.EmployeeFacebookSimulationProcessor;
 
 import org.apache.camel.builder.RouteBuilder;
@@ -29,7 +28,9 @@ public class EmployeeSimulationRoute extends RouteBuilder {
          * every 45 seconds
          */
         from("quartz2://employeeGroup/commentFacebookTimer?cron=0/45+*+*+*+*+?")
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll")
+                .setBody()
+                .constant("{ \"status\": \"OPEN\" }")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=findAll")
                 .bean(EmployeeFacebookSimulationProcessor.class,
                         "commentOnFacebookBusinessCase")
                 .to("facebook://commentPost?postId="
@@ -37,19 +38,25 @@ public class EmployeeSimulationRoute extends RouteBuilder {
                         + header("CamelFacebook.message")).end();
 
         /**
-         * An employee closes a Facebook ticket (aka Facebook post or
-         * FacebookBusinessCase) if there are more than 1 available, every 55
-         * second (includes leaving a comment before deleting the post)
-         * 
-         * TODO Think about the reasonableness of closing a FacebookBusinessCase
-         * (deleting a Post)
+         * An employee closes a Facebook ticket (aka Facebook post or open
+         * FacebookBusinessCase), every 55 seconds (includes leaving a comment)
          */
-        from("quartz2://employeeGroup/closeFacebookTimer?cron=0/55+*+*+*+*+?")
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=findAll")
+        from("quartz2://employeeGroup/closeFacebookTimer?cron=0/15+*+*+*+*+?")
+                .setBody()
+                .constant("{ \"status\": \"OPEN\" }")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=findAll")
                 .bean(EmployeeFacebookSimulationProcessor.class,
                         "closeFacebookBusinessCase")
+                .wireTap("direct:updateBusinessCaseMongo")
                 .to("facebook://commentPost?postId="
                         + header("CamelFacebook.postId") + "&" + "message="
                         + header("CamelFacebook.message")).end();
+
+        /**
+         * Updates the business case in the mongoDB
+         */
+        from("direct:updateBusinessCaseMongo")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=save")
+                .end();
     }
 }

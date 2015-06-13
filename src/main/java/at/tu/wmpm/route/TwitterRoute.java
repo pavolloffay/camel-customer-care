@@ -23,7 +23,8 @@ import at.tu.wmpm.processor.WireTapLogTwitter;
 @Component
 public class TwitterRoute extends RouteBuilder {
 
-    private static final Logger log = LoggerFactory.getLogger(ExceptionRoute.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(ExceptionRoute.class);
 
     @Autowired
     private WireTapLogTwitter wiretapTwitter;
@@ -35,7 +36,6 @@ public class TwitterRoute extends RouteBuilder {
     @Value("${dropbox.auth.param}")
     private String DROPBOX_AUTH_PARAMETERS;
 
-
     @Override
     @SuppressWarnings("deprecation")
     public void configure() throws Exception {
@@ -43,16 +43,16 @@ public class TwitterRoute extends RouteBuilder {
         JAXBContext jaxbContext = JAXBContext.newInstance(BusinessCase.class);
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
-        from("twitter://timeline/home?type=polling&delay=10&consumerKey={{twitter.consumer.key}}&"
-                + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
-                + "accessTokenSecret={{twitter.access.token.secret}}")
+        from(
+                "twitter://timeline/home?type=polling&delay=200&consumerKey={{twitter.consumer.key}}&"
+                        + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
+                        + "accessTokenSecret={{twitter.access.token.secret}}")
                 .wireTap("direct:logTwitter", wiretapTwitter)
                 .process(twitterProcessor)
                 .multicast()
                 .parallelProcessing()
-                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.collection}}&operation=insert",
-                        "seda:twitterToXml"/*, "direct:addToTWCalendar"*/);
-
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=insert",
+                        "seda:twitterToXml"/* , "direct:addToTWCalendar" */);
 
         from("seda:twitterToXml?concurrentConsumers=3")
                 .marshal(jaxbFormat)
@@ -67,9 +67,8 @@ public class TwitterRoute extends RouteBuilder {
         from("direct:logTwitter")
                 .to("file:logs/workingdir/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
-
         from("direct:addToTWCalendar")
-            .bean(CalendarProcessor.class, "process")
-            .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
+                .bean(CalendarProcessor.class, "process")
+                .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
     }
 }

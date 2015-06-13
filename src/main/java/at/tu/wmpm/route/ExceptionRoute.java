@@ -1,6 +1,5 @@
 package at.tu.wmpm.route;
 
-
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +16,11 @@ import org.springframework.stereotype.Component;
  * johannes on 31.05.2015
  */
 @Component
-@DependsOn({"google-calendar", "facebookConfiguration"})
+@DependsOn({ "google-calendar", "facebookConfiguration" })
 public class ExceptionRoute extends RouteBuilder {
 
-    private static final Logger log = LoggerFactory.getLogger(ExceptionRoute.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(ExceptionRoute.class);
 
     @Override
     public void configure() throws Exception {

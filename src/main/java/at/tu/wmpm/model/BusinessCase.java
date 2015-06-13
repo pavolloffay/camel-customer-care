@@ -16,9 +16,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class BusinessCase {
 
-    public BusinessCase() {
+    protected BusinessCase() {
         this._id = UUID.randomUUID().toString();
         this.comments = new ArrayList<Comment>();
+        this.status = BusinessCaseStatus.OPEN;
     }
 
     @Id
@@ -29,10 +30,10 @@ public abstract class BusinessCase {
     private String parentId;
     private String sender;
     private String incomingDate;
+    private BusinessCaseStatus status;
     @JsonIgnore
     private boolean isNew;
     private ArrayList<Comment> comments;
-
 
     public boolean isNew() {
         return isNew;
@@ -82,17 +83,18 @@ public abstract class BusinessCase {
         this.comments = comments;
     }
 
-    public void addComment(Comment comment){
+    public void addComment(Comment comment) {
         this.comments.add(comment);
     }
 
     @Override
     public String toString() {
-        return "ID: "+_id+", Parent ID: "+parentId+", Sender: "+sender+", Subject: "+subject;
+        return "ID: " + _id + ", Parent ID: " + parentId + ", Sender: "
+                + sender + ", Subject: " + subject;
     }
 
     public String getLastMessage() {
-        return comments.get(comments.size()-1).getMessage();
+        return comments.get(comments.size() - 1).getMessage();
     }
 
     /**
@@ -103,18 +105,27 @@ public abstract class BusinessCase {
     }
 
     /**
-     * @param incomingDate the incomingDate to set
+     * @param incomingDate
+     *            the incomingDate to set
      */
     public void setIncomingDate(String incomingDate) {
         this.incomingDate = incomingDate;
     }
 
-    public boolean hasCommentWithId(String id){
-        for(Comment c: this.comments){
-            if(c.getId().equals(id)){
+    public boolean hasCommentWithId(String id) {
+        for (Comment c : this.comments) {
+            if (c.getId().equals(id)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public BusinessCaseStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BusinessCaseStatus status) {
+        this.status = status;
     }
 }
