@@ -1,15 +1,16 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.processor.EmployeeFacebookSimulationProcessor;
-
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import at.tu.wmpm.processor.EmployeeFacebookSimulationProcessor;
+import at.tu.wmpm.processor.EmployeeMailSimulationProcessor;
+
 /**
  * Simulation for the employee
- * 
+ *
  * @author Christian
  *
  */
@@ -36,6 +37,14 @@ public class EmployeeSimulationRoute extends RouteBuilder {
                 .to("facebook://commentPost?postId="
                         + header("CamelFacebook.postId") + "&" + "message="
                         + header("CamelFacebook.message")).end();
+
+
+        from("quartz2://employeeGroup/answerMailTimer?cron=0/60+*+*+*+*+?")
+        .setBody()
+        .constant("{ \"status\": \"OPEN\" }")
+        .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=findAll")
+        .bean(EmployeeMailSimulationProcessor.class, "answerMailBusinessCase")
+        .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}").end();
 
         /**
          * An employee closes a Facebook ticket (aka Facebook post or open
