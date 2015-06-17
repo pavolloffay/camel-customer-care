@@ -23,15 +23,13 @@ public class EmployeeMailSimulationProcessor {
     private static final Logger log = LoggerFactory.getLogger(EmployeeMailSimulationProcessor.class);
 
     public void answerMailBusinessCase(Exchange e) throws Exception {
-        String mailAnswer = "Please restart your device and try it again. If further problems occur don't hesitate to contact us again.";
+        String mailAnswer = "Please restart your device and try it again. If further problems occur don't hesitate to contact us again. Your ticket will be closed. ";
 
         Message m = addComment(e, mailAnswer);
 
         if (m==null) {
-            throw new MailException(
-                    "An error occured while processing business cases from mongoDB.");
+            throw new MailException("An error occured while processing business cases from mongoDB.");
         }
-        e.setOut(m);
         log.debug("Mail answer set");
     }
 
@@ -53,9 +51,6 @@ public class EmployeeMailSimulationProcessor {
         if (count == 0) {
             throw new MailException("There are no Mail business cases in the mongoDB");
         }
-        if (DBObjectList!=null)
-            log.info("Got " + DBObjectList.size()+ " DBObjects according to list");
-
         if (DBObjectList!=null) {
             businessCaseList = generateMailBusinessCases(DBObjectList);
             if (businessCaseList!=null) {
@@ -70,6 +65,8 @@ public class EmployeeMailSimulationProcessor {
                         m.setHeader("From", "customer.care.tu.wien@gmail.com");
                         m.setHeader("Subject", "Ticket-ID:" + chosenBusinessCase.getId());
                         m.setHeader("Body", mailAnswer);
+                        chosenBusinessCase.setStatus(BusinessCaseStatus.CLOSED);
+                        m.setBody(chosenBusinessCase);
                         e.setOut(m);
                         return m;
                     }

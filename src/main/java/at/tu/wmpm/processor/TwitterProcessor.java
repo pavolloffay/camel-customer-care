@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import twitter4j.Status;
+import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.TwitterBusinessCase;
 
 /**
@@ -33,6 +34,12 @@ public class TwitterProcessor implements Processor {
         tBC.setSender(status.getUser().getName());
         tBC.setIncomingDate(status.getCreatedAt().toString());
         tBC.setTweetID(status.getId());
+        Comment c=new Comment();
+        c.setDate(status.getCreatedAt());
+        c.setFrom(tBC.getSender());
+        c.setMessage(status.getText());
+        log.debug("TWITTER MESSAGE: "+c.toString());
+        tBC.addComment(c);
 
         Message tweets = new DefaultMessage();
         tweets.setBody(tBC);

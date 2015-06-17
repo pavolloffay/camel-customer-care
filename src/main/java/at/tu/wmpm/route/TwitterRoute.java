@@ -62,7 +62,7 @@ public class TwitterRoute extends RouteBuilder {
                         simple("dropbox://put?"
                                 + DROPBOX_AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/twitter_ex.xml&remotePath=/XMLExports/Twitter_${date:now:yyyyMMdd_HH-mm-SS}.xml"))
-                .wireTap("direct:logDropbox", wiretapDropbox);
+                .wireTap("seda:logDropbox", wiretapDropbox);
 
         from("direct:logTwitter")
                 .to("file:logs/workingdir/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");

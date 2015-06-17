@@ -38,14 +38,6 @@ public class EmployeeSimulationRoute extends RouteBuilder {
                         + header("CamelFacebook.postId") + "&" + "message="
                         + header("CamelFacebook.message")).end();
 
-
-        from("quartz2://employeeGroup/answerMailTimer?cron=0/60+*+*+*+*+?")
-        .setBody()
-        .constant("{ \"status\": \"OPEN\" }")
-        .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=findAll")
-        .bean(EmployeeMailSimulationProcessor.class, "answerMailBusinessCase")
-        .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}").end();
-
         /**
          * An employee closes a Facebook ticket (aka Facebook post or open
          * FacebookBusinessCase), every 55 seconds (includes leaving a comment)
@@ -67,5 +59,18 @@ public class EmployeeSimulationRoute extends RouteBuilder {
         from("direct:updateBusinessCaseMongo")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=save")
                 .end();
+
+
+        from("quartz2://employeeGroup/answerMailTimer?cron=0/60+*+*+*+*+?")
+        .setBody()
+        .constant("{ \"status\": \"OPEN\" }")
+        .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=findAll")
+        .bean(EmployeeMailSimulationProcessor.class, "answerMailBusinessCase")
+        .wireTap("direct:updateMailBusinessCaseMongo")
+        .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}").end();
+
+        from("direct:updateMailBusinessCaseMongo")
+        .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=save")
+        .end();
     }
 }
