@@ -44,15 +44,15 @@ public class TwitterRoute extends RouteBuilder {
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
         from(
-                "twitter://timeline/home?type=polling&delay=200&consumerKey={{twitter.consumer.key}}&"
+                "twitter://timeline/home?type=polling&delay=60&consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
                 .wireTap("direct:logTwitter", wiretapTwitter)
-                .process(twitterProcessor)
+                .bean(twitterProcessor, "process")
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=insert",
-                        "seda:twitterToXml"/* , "direct:addToTWCalendar" */);
+                        "seda:twitterToXml", "direct:addToTWCalendar");
 
         from("seda:twitterToXml?concurrentConsumers=3")
                 .marshal(jaxbFormat)

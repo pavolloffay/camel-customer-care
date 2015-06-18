@@ -20,28 +20,33 @@ import com.google.api.services.calendar.model.EventDateTime;
 @Configuration
 public class CalendarProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(CalendarProcessor.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(CalendarProcessor.class);
 
     public void process(@Body BusinessCase body, Exchange e) throws Exception {
         Message in = new DefaultMessage();
         com.google.api.services.calendar.model.Event event = new Event()
-                .setSummary(body.getSender()+": "+body.getId())
-                .setDescription(body.toString()+", Message: "+body.getLastMessage());
+                .setSummary(body.getSender() + ": " + body.getId())
+                .setDescription(
+                        body.toString() + ", Message: " + body.getLastMessage());
 
-        DateTime startDateTime = new DateTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(((long)new Date().getTime())-(120*60000)+(5*60000)));
-        EventDateTime start = new EventDateTime()
-                .setDateTime(startDateTime)
+        DateTime startDateTime = new DateTime(new SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss").format(((long) new Date().getTime())
+                - (120 * 60000) + (5 * 60000)));
+        EventDateTime start = new EventDateTime().setDateTime(startDateTime)
                 .setTimeZone("Europe/Vienna");
         event.setStart(start);
 
-        DateTime endDateTime = new DateTime(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").format(((long)new Date().getTime())-(120*60000)+(60*60000)));
-        EventDateTime end = new EventDateTime()
-                .setDateTime(endDateTime)
+        DateTime endDateTime = new DateTime(new SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss").format(((long) new Date().getTime())
+                - (120 * 60000) + (60 * 60000)));
+        EventDateTime end = new EventDateTime().setDateTime(endDateTime)
                 .setTimeZone("Europe/Vienna");
         event.setEnd(end);
 
-        in.setHeader("CamelGoogleCalendar.content", (com.google.api.services.calendar.model.Event)event);
-        in.setBody((com.google.api.services.calendar.model.Event)event);
+        in.setHeader("CamelGoogleCalendar.content",
+                (com.google.api.services.calendar.model.Event) event);
+        in.setBody((com.google.api.services.calendar.model.Event) event);
         e.setOut(in);
     }
 }

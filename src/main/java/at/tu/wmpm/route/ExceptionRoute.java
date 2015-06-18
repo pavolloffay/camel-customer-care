@@ -26,23 +26,20 @@ public class ExceptionRoute extends RouteBuilder {
     public void configure() throws Exception {
 
         // Exception handling
-        onException(MailException.class).continued(true).to(
-                "direct:logMailException"); // TODO directly
-        // .to(file:logs/workingdir/excp/logMail)
-        // ??
-        onException(FacebookException.class).continued(true).to(
-                "direct:logFacebookException");
-        onException(TwitterException.class).continued(true).to(
-                "direct:logTwitterException");
-        onException(DropboxLogException.class).continued(true).to(
-                "direct:logDropboxException");
-        from("direct:logMailException")
+        onException(MailException.class)
+                .continued(true)
                 .to("file:logs/workingdir/exceptions/logMail?fileName=exception_mail_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-        from("direct:logFacebookException")
+
+        onException(FacebookException.class)
+                .continued(true)
                 .to("file:logs/workingdir/exceptions/logFacebook?fileName=exception_facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-        from("direct:logTwitterException")
-                .to("file:logs/workingdir/exceptions/logTwitter?fileName=exception_twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-        from("direct:logDropboxException")
+
+        onException(TwitterException.class).continued(true)
+        // .to("file:logs/workingdir/exceptions/logTwitter?fileName=exception_twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
+                .to("file:logs/workingdir/exceptions/logTwitter");
+
+        onException(DropboxLogException.class)
+                .continued(true)
                 .to("file:logs/workingdir/exceptions/logDropbox?fileName=exception_dropbox_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
     }
 }
