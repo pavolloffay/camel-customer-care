@@ -17,7 +17,8 @@ import at.tu.wmpm.processor.WireTapLogDropbox;
 @Component
 public class BackupLogsRoute extends RouteBuilder {
 
-    private static final Logger log = LoggerFactory.getLogger(ExceptionRoute.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(ExceptionRoute.class);
 
     @Value("${dropbox.auth.param}")
     private String DROPBOX_AUTH_PARAMETERS;
@@ -25,10 +26,7 @@ public class BackupLogsRoute extends RouteBuilder {
     @Autowired
     private FileAggregationStrategy faStrategy;
     @Autowired
-    private FileProcessor fileProcessor;
-    @Autowired
     private WireTapLogDropbox wiretapDropbox;
-
 
     @Override
     @SuppressWarnings("deprecation")
@@ -38,9 +36,9 @@ public class BackupLogsRoute extends RouteBuilder {
          * Backup Logs to dropbox every 30 seconds (interval currently set for
          * testing purposes)
          */
-        from("file:logs/workingdir?recursive=true&delete=false&scheduler=quartz2&scheduler.cron=0/30+*+*+*+*+?")
-//                .transform(body(String.class))
-                .process(fileProcessor) // TODO use transform!!
+        from(
+                "file:logs/workingdir?recursive=true&delete=false&scheduler=quartz2&scheduler.cron=0/30+*+*+*+*+?")
+                .bean(FileProcessor.class, "process")
                 .aggregate(constant(true), faStrategy)
                 .completionFromBatchConsumer()
                 .to("file:logs/forDropbox?fileName=forDropbox.txt")

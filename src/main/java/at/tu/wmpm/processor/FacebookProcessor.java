@@ -9,6 +9,7 @@ import org.apache.camel.impl.DefaultMessage;
 import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import at.tu.wmpm.model.Comment;
@@ -18,27 +19,25 @@ import facebook4j.Post;
 /**
  * Created by pavol on 8.5.2015.
  *
- * Access token is probably valid only for short period of time
- *      get accessToken - https://developers.facebook.com/tools/explorer/145634995501895/
+ * Access token is probably valid only for short period of time get accessToken
+ * - https://developers.facebook.com/tools/explorer/145634995501895/
  *
  * Facebook app - Customer Care
- *      https://developers.facebook.com/apps/833818856683698/dashboard/
+ * https://developers.facebook.com/apps/833818856683698/dashboard/
  *
  * Facebook page - Area 51 Customer Care
- *      https://www.facebook.com/area51customercare
+ * https://www.facebook.com/area51customercare
  *
  **/
-@Service
-public class FacebookProcessor implements Processor {
+@Configuration
+public class FacebookProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(FacebookProcessor.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(FacebookProcessor.class);
 
-    @Override
     public void process(Exchange exchange) throws Exception {
-        //log.debug(ReflectionToStringBuilder.toString(exchange));
-
         Message in = exchange.getIn();
-        Post post = (Post)in.getBody();
+        Post post = (Post) in.getBody();
 
         /**
          * Set new Business case to exchange message
@@ -49,7 +48,6 @@ public class FacebookProcessor implements Processor {
         businessCase.setFacebookUserId(post.getFrom().getId());
         businessCase.setFacebookPostId(post.getId());
 
-
         Comment comment = new Comment();
         comment.setFrom(post.getFrom().getName());
         comment.setMessage(post.getMessage());
@@ -59,8 +57,8 @@ public class FacebookProcessor implements Processor {
         ArrayList<Comment> commentList = new ArrayList<Comment>();
         commentList.add(comment);
 
-        if(post.getComments() != null){
-            for(facebook4j.Comment c: post.getComments()){
+        if (post.getComments() != null) {
+            for (facebook4j.Comment c : post.getComments()) {
                 Comment newComment = new Comment();
                 newComment.setFrom(c.getFrom().getName());
                 newComment.setMessage(c.getMessage());

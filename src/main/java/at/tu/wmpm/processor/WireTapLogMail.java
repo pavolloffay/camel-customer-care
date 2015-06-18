@@ -30,8 +30,8 @@ public class WireTapLogMail implements Processor {
             throw new MailException("Subject mustn't be null!");
 
         body = "Wiretap - EmailLog on " + timeStamp + "\n" + "> Subject: "
-                + subject + "\n" + "> From: " + from + "\n" + "> To: " + to + "\n"
-                + "> Body:\n" + body;
+                + subject + "\n" + "> From: " + from + "\n" + "> To: " + to
+                + "\n" + "> Body:\n" + body;
 
         exchange.getIn().setBody(body);
     }

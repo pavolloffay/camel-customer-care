@@ -4,6 +4,11 @@ import org.apache.camel.Exchange;
 import org.apache.camel.processor.aggregate.AggregationStrategy;
 import org.springframework.stereotype.Service;
 
+/**
+ * 
+ * @author Christian
+ *
+ */
 @Service
 public class FileAggregationStrategy implements AggregationStrategy {
 

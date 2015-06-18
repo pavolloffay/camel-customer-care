@@ -22,21 +22,14 @@ import at.tu.wmpm.processor.MongoDbBusinessCaseProcessor;
  * Created by pavol on 8.6.2015.
  */
 @Component
-@DependsOn({"google-calendar"})
+@DependsOn({ "google-calendar" })
 public class FacebookRoute extends RouteBuilder {
 
-    private static final Logger log = LoggerFactory.getLogger(ExceptionRoute.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(ExceptionRoute.class);
 
     @Value("${dropbox.auth.param}")
     private String DROPBOX_AUTH_PARAMETERS;
-
-    @Autowired
-    private FacebookProcessor facebookProcessor;
-    @Autowired
-    private FacebookUpdatePostProcessor facebookUpdatePostProcessor;
-    @Autowired
-    private MongoDbBusinessCaseProcessor mongoDbProcessor;
-
 
     @Override
     public void configure() throws Exception {
@@ -44,25 +37,26 @@ public class FacebookRoute extends RouteBuilder {
         JAXBContext jaxbContext = JAXBContext.newInstance(BusinessCase.class);
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
-        from("facebook://getTagged?reading.since=1.1.2015&userId={{facebook.page.id}}&consumer.delay=10000")
-                .process(facebookProcessor)
+        from(
+                "facebook://getTagged?reading.since=1.1.2015&userId={{facebook.page.id}}&consumer.delay=10000")
+                .bean(FacebookProcessor.class, "process")
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=insert",
-                        "seda:facebookToXml"/*, "direct:addToFBCalendar"*/);
-
+                        "seda:facebookToXml"/* , "direct:addToFBCalendar" */);
 
         from("direct:logFacebook")
                 .to("file:logs/workingdir/wiretap-logs/logFacebook?fileName=facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         from("timer://commentfetch?fixedRate=true&period=10000")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=findAll")
-                .split(body()).process(mongoDbProcessor)
+                .split(body())
+                .bean(MongoDbBusinessCaseProcessor.class, "process")
                 .to("direct:processNewComments");
 
         from("direct:processNewComments")
-                .to("facebook://post?postId="+header("FacebookCamel.postId"))
-                .process(facebookUpdatePostProcessor)
+                .to("facebook://post?postId=" + header("FacebookCamel.postId"))
+                .bean(FacebookUpdatePostProcessor.class, "process")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=save");
 
         from("seda:facebookToXml?concurrentConsumers=3")
@@ -75,8 +69,7 @@ public class FacebookRoute extends RouteBuilder {
                                 + "&uploadMode=add&localPath=logs/XMLExports/ex2.xml&remotePath=/XMLExports/FB_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
 
         from("direct:addToFBCalendar")
-            .bean(CalendarProcessor.class, "process")
-            .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
-
+                .bean(CalendarProcessor.class, "process")
+                .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
     }
 }

@@ -5,23 +5,25 @@ import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
 import org.apache.camel.Processor;
 import org.mongodb.morphia.Morphia;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.BasicDBObject;
 
+import at.tu.wmpm.exception.MailException;
 import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.MailBusinessCase;
 
-@Service
-public class MailUpdateCommentsProcessor implements Processor {
+@Configuration
+public class MailUpdateCommentsProcessor {
 
-    @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) throws MailException {
 
         Message in = exchange.getIn();
         Comment comment = (Comment) in.getHeaders().get("comment");
 
-        MailBusinessCase mailBusinessCase = getMailBusinessCase((BasicDBObject) in.getBody());
+        MailBusinessCase mailBusinessCase = getMailBusinessCase((BasicDBObject) in
+                .getBody());
         mailBusinessCase.addComment(comment);
 
         Message outMessage = exchange.getOut();
@@ -34,7 +36,8 @@ public class MailUpdateCommentsProcessor implements Processor {
     private MailBusinessCase getMailBusinessCase(BasicDBObject basicDBObject) {
         Morphia morphia = new Morphia();
         morphia.map(MailBusinessCase.class);
-        MailBusinessCase mailBusinessCase = morphia.fromDBObject(MailBusinessCase.class, basicDBObject);
+        MailBusinessCase mailBusinessCase = morphia.fromDBObject(
+                MailBusinessCase.class, basicDBObject);
 
         return mailBusinessCase;
     }

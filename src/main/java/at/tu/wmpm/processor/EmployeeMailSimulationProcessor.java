@@ -20,15 +20,17 @@ import com.mongodb.DBObject;
 @Configuration
 public class EmployeeMailSimulationProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(EmployeeMailSimulationProcessor.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(EmployeeMailSimulationProcessor.class);
 
     public void answerMailBusinessCase(Exchange e) throws Exception {
         String mailAnswer = "Please restart your device and try it again. If further problems occur don't hesitate to contact us again. Your ticket will be closed. ";
 
         Message m = addComment(e, mailAnswer);
 
-        if (m==null) {
-            throw new MailException("An error occured while processing business cases from mongoDB.");
+        if (m == null) {
+            throw new MailException(
+                    "An error occured while processing business cases from mongoDB.");
         }
         log.debug("Mail answer set");
     }
@@ -36,7 +38,8 @@ public class EmployeeMailSimulationProcessor {
     public Message addComment(Exchange e, String message) throws Exception {
 
         @SuppressWarnings("unchecked")
-        List<DBObject> DBObjectList = e.getIn().getMandatoryBody((Class<List<DBObject>>) (Class<?>) List.class);
+        List<DBObject> DBObjectList = e.getIn().getMandatoryBody(
+                (Class<List<DBObject>>) (Class<?>) List.class);
         List<MailBusinessCase> businessCaseList = null;
 
         int count;
@@ -45,25 +48,36 @@ public class EmployeeMailSimulationProcessor {
         Message m;
         String mailAnswer = "";
 
-        count = e.getIn().getHeader("CamelMongoDbResultTotalSize", Integer.class);
+        count = e.getIn().getHeader("CamelMongoDbResultTotalSize",
+                Integer.class);
         log.info("Got " + count + " DBObjects according to header");
 
         if (count == 0) {
-            throw new MailException("There are no Mail business cases in the mongoDB");
+            throw new MailException(
+                    "There are no Mail business cases in the mongoDB");
         }
-        if (DBObjectList!=null) {
+        if (DBObjectList != null) {
             businessCaseList = generateMailBusinessCases(DBObjectList);
-            if (businessCaseList!=null) {
-                log.info("Got " + businessCaseList.size()+ " open business cases");
+            if (businessCaseList != null) {
+                log.info("Got " + businessCaseList.size()
+                        + " open business cases");
                 if (!businessCaseList.isEmpty()) {
-                    chosenBusinessCase = businessCaseList.get(random.nextInt(businessCaseList.size()));
-                    log.info("Chosen BusinessCase: "+chosenBusinessCase.getId());
-                    if (chosenBusinessCase.getId()!=null) {
-                        mailAnswer = "Dear " + chosenBusinessCase.getSender()+ "\n" + message + "\n\nYours sincerely,\n The IT Crowd\n\n\n\nYour request:\n\n"+chosenBusinessCase.getLastMessage();
+                    chosenBusinessCase = businessCaseList.get(random
+                            .nextInt(businessCaseList.size()));
+                    log.info("Chosen BusinessCase: "
+                            + chosenBusinessCase.getId());
+                    if (chosenBusinessCase.getId() != null) {
+                        mailAnswer = "Dear "
+                                + chosenBusinessCase.getSender()
+                                + "\n"
+                                + message
+                                + "\n\nYours sincerely,\n The IT Crowd\n\n\n\nYour request:\n\n"
+                                + chosenBusinessCase.getLastMessage();
                         m = e.getOut();
                         m.setHeader("To", chosenBusinessCase.getSender());
                         m.setHeader("From", "customer.care.tu.wien@gmail.com");
-                        m.setHeader("Subject", "Ticket-ID:" + chosenBusinessCase.getId());
+                        m.setHeader("Subject", "Ticket-ID:"
+                                + chosenBusinessCase.getId());
                         m.setHeader("Body", mailAnswer);
                         chosenBusinessCase.setStatus(BusinessCaseStatus.CLOSED);
                         m.setBody(chosenBusinessCase);
@@ -76,7 +90,8 @@ public class EmployeeMailSimulationProcessor {
         return null;
     }
 
-    private List<MailBusinessCase> generateMailBusinessCases(List<DBObject> DBObjectList) {
+    private List<MailBusinessCase> generateMailBusinessCases(
+            List<DBObject> DBObjectList) {
         Morphia morphia = new Morphia();
         morphia.map(MailBusinessCase.class);
         List<MailBusinessCase> tempList = new ArrayList<MailBusinessCase>();
@@ -84,11 +99,10 @@ public class EmployeeMailSimulationProcessor {
         for (DBObject x : DBObjectList) {
             tempObject = morphia.fromDBObject(MailBusinessCase.class, x);
 
-            if (tempObject!=null) {
+            if (tempObject != null) {
                 if (tempObject.getStatus().equals(BusinessCaseStatus.OPEN))
                     tempList.add(tempObject);
-            }
-            else {
+            } else {
                 log.info("MailBusinessCase is null");
             }
         }

@@ -1,13 +1,16 @@
 package at.tu.wmpm.processor;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Processor;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
 
-@Service
-public class FileProcessor implements Processor {
+/**
+ * 
+ * @author Christian
+ *
+ */
+@Configuration
+public class FileProcessor {
 
-    @Override
     public void process(Exchange exchange) throws Exception {
         String body = exchange.getIn().getBody(String.class);
 

@@ -24,23 +24,17 @@ import at.tu.wmpm.processor.WireTapLogMail;
  * Created by pavol on 8.6.2015.
  */
 @Component
-@DependsOn({"google-calendar"})
+@DependsOn({ "google-calendar" })
 public class MailRoute extends RouteBuilder {
 
-    private static final Logger log = LoggerFactory.getLogger(ExceptionRoute.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(ExceptionRoute.class);
 
     @Value("${dropbox.auth.param}")
     private String DROPBOX_AUTH_PARAMETERS;
 
     @Autowired
-    private MailProcessor mailProcessor;
-    @Autowired
-    private MailUpdateCommentsProcessor mailUpdateProcessor;
-    @Autowired
     private WireTapLogMail wiretapMail;
-    @Autowired
-    private CalendarProcessor calendarProcessor;
-
 
     @Override
     @SuppressWarnings("deprecation")
@@ -49,10 +43,12 @@ public class MailRoute extends RouteBuilder {
         JAXBContext jaxbContext = JAXBContext.newInstance(BusinessCase.class);
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
-        from("pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
+        from(
+                "pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
                 .wireTap("seda:logMail", wiretapMail)
-                .process(mailProcessor)
-                .filter().method(SpamFilter.class, "isNoSpam")
+                .bean(MailProcessor.class, "process")
+                .filter()
+                .method(SpamFilter.class, "isNoSpam")
                 .choice()
                 .when(header("hasParent").isEqualTo(true))
                 .to("direct:mailUpdateComment")
@@ -60,16 +56,13 @@ public class MailRoute extends RouteBuilder {
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=insert",
-                        "direct:autoReplyEmail",
-                        "direct:addToCalendar",
-                        "seda:storeXMLEmail")
-                .end();
-
+                        "direct:autoReplyEmail", "direct:addToCalendar",
+                        "seda:storeXMLEmail").end();
 
         from("direct:mailUpdateComment")
                 .transform(body(BusinessCase.class).method("getParentId"))
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=findById")
-                .process(mailUpdateProcessor)
+                .bean(MailUpdateCommentsProcessor.class, "process")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=save");
 
         from("seda:logMail?concurrentConsumers=3")

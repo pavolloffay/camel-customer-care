@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class WireTapLogDropbox implements Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(WireTapLogDropbox.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(WireTapLogDropbox.class);
 
     @SuppressWarnings("unchecked")
     @Override

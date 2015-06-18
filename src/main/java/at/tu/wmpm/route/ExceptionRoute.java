@@ -34,9 +34,9 @@ public class ExceptionRoute extends RouteBuilder {
                 .continued(true)
                 .to("file:logs/workingdir/exceptions/logFacebook?fileName=exception_facebook_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
-        onException(TwitterException.class).continued(true)
-        // .to("file:logs/workingdir/exceptions/logTwitter?fileName=exception_twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
-                .to("file:logs/workingdir/exceptions/logTwitter");
+        onException(TwitterException.class)
+                .continued(true)
+                .to("file:logs/workingdir/exceptions/logTwitter?fileName=exception_twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         onException(DropboxLogException.class)
                 .continued(true)

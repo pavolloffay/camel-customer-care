@@ -30,8 +30,6 @@ public class TwitterRoute extends RouteBuilder {
     private WireTapLogTwitter wiretapTwitter;
     @Autowired
     private WireTapLogDropbox wiretapDropbox;
-    @Autowired
-    private TwitterProcessor twitterProcessor;
 
     @Value("${dropbox.auth.param}")
     private String DROPBOX_AUTH_PARAMETERS;
@@ -48,7 +46,7 @@ public class TwitterRoute extends RouteBuilder {
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
                 .wireTap("direct:logTwitter", wiretapTwitter)
-                .bean(twitterProcessor, "process")
+                .bean(TwitterProcessor.class, "process")
                 .multicast()
                 .parallelProcessing()
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=insert",

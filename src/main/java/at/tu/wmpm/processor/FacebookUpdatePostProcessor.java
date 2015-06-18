@@ -1,16 +1,13 @@
 package at.tu.wmpm.processor;
 
-import java.util.ArrayList;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultMessage;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Configuration;
 
+import at.tu.wmpm.exception.FacebookException;
 import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.FacebookBusinessCase;
 import facebook4j.Post;
@@ -18,22 +15,23 @@ import facebook4j.Post;
 /**
  * Created by pavol on 8.5.2015.
  **/
-@Service
-public class FacebookUpdatePostProcessor implements Processor {
+@Configuration
+public class FacebookUpdatePostProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(FacebookUpdatePostProcessor.class);
+    private static final Logger log = LoggerFactory
+            .getLogger(FacebookUpdatePostProcessor.class);
 
-    @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) throws FacebookException {
 
-        FacebookBusinessCase bc = (FacebookBusinessCase)exchange.getIn().getHeader("bc");
+        FacebookBusinessCase bc = (FacebookBusinessCase) exchange.getIn()
+                .getHeader("bc");
 
-        Post post = (Post)exchange.getIn().getBody();
+        Post post = (Post) exchange.getIn().getBody();
 
-        if(post.getComments() != null){
-            for(facebook4j.Comment c: post.getComments()){
+        if (post.getComments() != null) {
+            for (facebook4j.Comment c : post.getComments()) {
 
-            if(!bc.hasCommentWithId(c.getId())){
+                if (!bc.hasCommentWithId(c.getId())) {
                     Comment newComment = new Comment();
                     newComment.setFrom(c.getFrom().getName());
                     newComment.setMessage(c.getMessage());
@@ -41,15 +39,14 @@ public class FacebookUpdatePostProcessor implements Processor {
                     newComment.setId(c.getId());
                     bc.addComment(newComment);
 
-                    log.debug("FB Comment added: "+c.getId());
+                    log.debug("FB Comment added: " + c.getId());
                 }
             }
         }
-        
+
         Message message = new DefaultMessage();
         message.setBody(bc);
 
         exchange.setOut(message);
-
-   }
+    }
 }

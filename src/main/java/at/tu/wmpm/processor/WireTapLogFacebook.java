@@ -21,9 +21,7 @@ public class WireTapLogFacebook implements Processor {
     public void process(Exchange exchange) throws FacebookException {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd @ HH:mm:ss")
                 .format(Calendar.getInstance().getTime());
-        // String subject = (String) exchange.getIn().getHeader("Subject");
-        // String from = (String) exchange.getIn().getHeader("From");
-        // String to = (String) exchange.getIn().getHeader("To");
+
         String body = (String) exchange.getIn().getBody();
 
         body = "Wiretap - EmailLog on " + timeStamp + "\n" + "> Body:\n" + body;

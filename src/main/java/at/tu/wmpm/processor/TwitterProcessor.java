@@ -2,12 +2,10 @@ package at.tu.wmpm.processor;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
-import org.apache.camel.Processor;
 import org.apache.camel.impl.DefaultMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
 
 import twitter4j.Status;
 import at.tu.wmpm.exception.TwitterException;
@@ -15,7 +13,8 @@ import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.TwitterBusinessCase;
 
 /**
- * Twitter Processor Created by Johannes on 31.5.2015.
+ * Twitter Processor Created by Johannes on 31.5.2015. Updated by Christian on
+ * 18.06.2015
  **/
 @Configuration
 public class TwitterProcessor {
