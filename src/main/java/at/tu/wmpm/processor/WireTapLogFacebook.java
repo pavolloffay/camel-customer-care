@@ -1,13 +1,12 @@
 package at.tu.wmpm.processor;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
+import at.tu.wmpm.exception.FacebookException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.springframework.stereotype.Service;
 
-import at.tu.wmpm.exception.FacebookException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * 

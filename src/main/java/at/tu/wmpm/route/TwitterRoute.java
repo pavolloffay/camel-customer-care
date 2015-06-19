@@ -1,7 +1,10 @@
 package at.tu.wmpm.route;
 
-import javax.xml.bind.JAXBContext;
-
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.CalendarProcessor;
+import at.tu.wmpm.processor.TwitterProcessor;
+import at.tu.wmpm.processor.WireTapLogDropbox;
+import at.tu.wmpm.processor.WireTapLogTwitter;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
@@ -11,38 +14,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.CalendarProcessor;
-import at.tu.wmpm.processor.TwitterProcessor;
-import at.tu.wmpm.processor.WireTapLogDropbox;
-import at.tu.wmpm.processor.WireTapLogTwitter;
+import javax.xml.bind.JAXBContext;
 
 /**
  * Created by pavol on 8.6.2015.
  */
 @Component
-public class TwitterRoute extends RouteBuilder {
+public class TwitterRoute extends CustomRouteBuilder {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(ExceptionRoute.class);
+    private static final Logger log = LoggerFactory.getLogger(CustomRouteBuilder.class);
+
+    @Value("${dropbox.auth.param}")
+    private String DROPBOX_AUTH_PARAMETERS;
 
     @Autowired
     private WireTapLogTwitter wiretapTwitter;
     @Autowired
     private WireTapLogDropbox wiretapDropbox;
+    @Autowired
+    private CalendarProcessor calendarProcessor;
 
-    @Value("${dropbox.auth.param}")
-    private String DROPBOX_AUTH_PARAMETERS;
 
     @Override
     @SuppressWarnings("deprecation")
     public void configure() throws Exception {
+        super.configure();
 
         JAXBContext jaxbContext = JAXBContext.newInstance(BusinessCase.class);
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
-        from(
-                "twitter://timeline/home?type=polling&delay=60&consumerKey={{twitter.consumer.key}}&"
+        from("twitter://timeline/home?type=polling&delay=60&consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
                 .wireTap("direct:logTwitter", wiretapTwitter)
@@ -66,7 +67,7 @@ public class TwitterRoute extends RouteBuilder {
                 .to("file:logs/workingdir/wiretap-logs/logTwitter?fileName=twitter_${date:now:yyyyMMdd_HH-mm-SS}.log&flatten=true");
 
         from("direct:addToTWCalendar")
-                .bean(CalendarProcessor.class, "process")
+                .bean(calendarProcessor, "process")
                 .to("google-calendar://events/insert?calendarId={{google.calendar.id}}");
     }
 }

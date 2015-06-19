@@ -1,10 +1,10 @@
 package at.tu.wmpm.route;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.springframework.stereotype.Component;
-
 import at.tu.wmpm.processor.EmployeeFacebookSimulationProcessor;
 import at.tu.wmpm.processor.EmployeeMailSimulationProcessor;
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Simulation for the employee
@@ -13,11 +13,18 @@ import at.tu.wmpm.processor.EmployeeMailSimulationProcessor;
  *
  */
 @Component
-public class EmployeeSimulationRoute extends RouteBuilder {
+public class EmployeeSimulationRoute extends CustomRouteBuilder {
+
+    @Autowired
+    private EmployeeFacebookSimulationProcessor employeeFacebookSimulationProcessor;
+    @Autowired
+    private EmployeeMailSimulationProcessor employeeMailSimulationProcessor;
+
 
     @Override
     @SuppressWarnings("deprecation")
     public void configure() throws Exception {
+        super.configure();
 
         /**
          * An employee answers (aka adds comment) to a FacebookBusinessCase
@@ -27,11 +34,12 @@ public class EmployeeSimulationRoute extends RouteBuilder {
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=findAll")
-                .bean(EmployeeFacebookSimulationProcessor.class,
+                .bean(employeeFacebookSimulationProcessor,
                         "commentOnFacebookBusinessCase")
                 .to("facebook://commentPost?postId="
                         + header("CamelFacebook.postId") + "&" + "message="
-                        + header("CamelFacebook.message")).end();
+                        + header("CamelFacebook.message"))
+                .end();
 
         /**
          * An employee closes a Facebook ticket (aka Facebook post or open
@@ -41,12 +49,13 @@ public class EmployeeSimulationRoute extends RouteBuilder {
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=findAll")
-                .bean(EmployeeFacebookSimulationProcessor.class,
+                .bean(employeeFacebookSimulationProcessor,
                         "closeFacebookBusinessCase")
                 .wireTap("direct:updateBusinessCaseMongo")
                 .to("facebook://commentPost?postId="
                         + header("CamelFacebook.postId") + "&" + "message="
-                        + header("CamelFacebook.message")).end();
+                        + header("CamelFacebook.message"))
+                .end();
 
         /**
          * Updates the FacebookBusinessCase in the mongoDB
@@ -63,7 +72,7 @@ public class EmployeeSimulationRoute extends RouteBuilder {
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.mailBcCollection}}&operation=findAll")
-                .bean(EmployeeMailSimulationProcessor.class,
+                .bean(employeeMailSimulationProcessor,
                         "answerMailBusinessCase")
                 .wireTap("direct:updateMailBusinessCaseMongo")
                 .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}")

@@ -1,21 +1,20 @@
 package at.tu.wmpm.processor;
 
+import at.tu.wmpm.exception.FacebookException;
+import at.tu.wmpm.model.Comment;
+import at.tu.wmpm.model.FacebookBusinessCase;
+import facebook4j.Post;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
-
-import at.tu.wmpm.exception.FacebookException;
-import at.tu.wmpm.model.Comment;
-import at.tu.wmpm.model.FacebookBusinessCase;
-import facebook4j.Post;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by pavol on 8.5.2015.
  **/
-@Configuration
+@Service
 public class FacebookUpdatePostProcessor {
 
     private static final Logger log = LoggerFactory

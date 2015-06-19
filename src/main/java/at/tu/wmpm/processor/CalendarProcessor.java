@@ -1,23 +1,21 @@
 package at.tu.wmpm.processor;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import at.tu.wmpm.model.BusinessCase;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import org.apache.camel.Body;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
-import at.tu.wmpm.model.BusinessCase;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
-
-@Configuration
+@Service
 public class CalendarProcessor {
 
     private static final Logger log = LoggerFactory

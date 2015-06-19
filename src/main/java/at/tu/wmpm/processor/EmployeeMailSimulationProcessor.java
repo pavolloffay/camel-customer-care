@@ -1,27 +1,25 @@
 package at.tu.wmpm.processor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import at.tu.wmpm.exception.MailException;
+import at.tu.wmpm.model.BusinessCaseStatus;
+import at.tu.wmpm.model.MailBusinessCase;
+import com.mongodb.DBObject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
-import at.tu.wmpm.exception.MailException;
-import at.tu.wmpm.model.BusinessCaseStatus;
-import at.tu.wmpm.model.MailBusinessCase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-import com.mongodb.DBObject;
-
-@Configuration
+@Service
 public class EmployeeMailSimulationProcessor {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(EmployeeMailSimulationProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(EmployeeMailSimulationProcessor.class);
+
 
     public void answerMailBusinessCase(Exchange e) throws Exception {
         String mailAnswer = "Please restart your device and try it again. If further problems occur don't hesitate to contact us again. Your ticket will be closed. ";
@@ -29,8 +27,7 @@ public class EmployeeMailSimulationProcessor {
         Message m = addComment(e, mailAnswer);
 
         if (m == null) {
-            throw new MailException(
-                    "An error occured while processing business cases from mongoDB.");
+            throw new MailException("An error occured while processing business cases from mongoDB.");
         }
         log.debug("Mail answer set");
     }
@@ -53,8 +50,7 @@ public class EmployeeMailSimulationProcessor {
         log.info("Got " + count + " DBObjects according to header");
 
         if (count == 0) {
-            throw new MailException(
-                    "There are no Mail business cases in the mongoDB");
+            throw new MailException("There are no Mail business cases in the mongoDB");
         }
         if (DBObjectList != null) {
             businessCaseList = generateMailBusinessCases(DBObjectList);

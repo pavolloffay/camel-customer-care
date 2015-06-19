@@ -1,27 +1,25 @@
 package at.tu.wmpm.processor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import at.tu.wmpm.exception.FacebookException;
+import at.tu.wmpm.model.BusinessCaseStatus;
+import at.tu.wmpm.model.FacebookBusinessCase;
+import com.mongodb.DBObject;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
-import at.tu.wmpm.exception.FacebookException;
-import at.tu.wmpm.model.BusinessCaseStatus;
-import at.tu.wmpm.model.FacebookBusinessCase;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-import com.mongodb.DBObject;
-
-@Configuration
+@Service
 public class EmployeeFacebookSimulationProcessor {
 
-    private static final Logger log = LoggerFactory
-            .getLogger(EmployeeFacebookSimulationProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(EmployeeFacebookSimulationProcessor.class);
+
 
     public void commentOnFacebookBusinessCase(Exchange e) throws Exception {
         String fbMessage = "Have you tried turning it off and on again? ;-)";
@@ -29,8 +27,7 @@ public class EmployeeFacebookSimulationProcessor {
         Message m = addComment(e, fbMessage);
 
         if (null == m) {
-            throw new FacebookException(
-                    "An error occured while processing business cases from mongoDB.");
+            throw new FacebookException("An error occured while processing business cases from mongoDB.");
         }
     }
 
@@ -45,8 +42,7 @@ public class EmployeeFacebookSimulationProcessor {
             m.setHeader("bc", fbc);
             m.setBody(fbc);
         } else
-            throw new FacebookException(
-                    "An error occured while processing business cases from mongoDB.");
+            throw new FacebookException("An error occured while processing business cases from mongoDB.");
     }
 
     public Message addComment(Exchange e, String message) throws Exception {
@@ -80,8 +76,7 @@ public class EmployeeFacebookSimulationProcessor {
             businessCaseList = generateFacebookBusinessCases(DBObjectList);
 
             if (null != businessCaseList) {
-                log.info("Got " + businessCaseList.size()
-                        + " open business cases");
+                log.info("Got " + businessCaseList.size() + " open business cases");
 
                 if (!businessCaseList.isEmpty()) {
                     chosenBusinessCase = businessCaseList.get(random

@@ -1,33 +1,19 @@
 package at.tu.wmpm.processor;
 
+import at.tu.wmpm.model.FacebookBusinessCase;
+import com.mongodb.BasicDBObject;
 import org.apache.camel.Exchange;
 import org.apache.camel.ExchangePattern;
 import org.apache.camel.Message;
-import org.apache.camel.Processor;
 import org.mongodb.morphia.Morphia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
-
-import com.mongodb.BasicDBObject;
-
-import at.tu.wmpm.model.FacebookBusinessCase;
 
 /**
  * Created by pavol on 8.5.2015.
- *
- * Access token is probably valid only for short period of time get accessToken
- * - https://developers.facebook.com/tools/explorer/145634995501895/
- *
- * Facebook app - Customer Care
- * https://developers.facebook.com/apps/833818856683698/dashboard/
- *
- * Facebook page - Area 51 Customer Care
- * https://www.facebook.com/area51customercare
- *
  **/
-@Configuration
+@Service
 public class MongoDbBusinessCaseProcessor {
 
     private static final Logger log = LoggerFactory

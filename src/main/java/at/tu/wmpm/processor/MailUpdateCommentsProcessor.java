@@ -1,20 +1,16 @@
 package at.tu.wmpm.processor;
 
-import org.apache.camel.Exchange;
-import org.apache.camel.ExchangePattern;
-import org.apache.camel.Message;
-import org.apache.camel.Processor;
-import org.mongodb.morphia.Morphia;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
-
-import com.mongodb.BasicDBObject;
-
 import at.tu.wmpm.exception.MailException;
 import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.MailBusinessCase;
+import com.mongodb.BasicDBObject;
+import org.apache.camel.Exchange;
+import org.apache.camel.ExchangePattern;
+import org.apache.camel.Message;
+import org.mongodb.morphia.Morphia;
+import org.springframework.stereotype.Service;
 
-@Configuration
+@Service
 public class MailUpdateCommentsProcessor {
 
     public void process(Exchange exchange) throws MailException {

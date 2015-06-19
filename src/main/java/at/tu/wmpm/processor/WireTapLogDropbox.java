@@ -1,13 +1,13 @@
 package at.tu.wmpm.processor;
 
-import java.util.Map;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.component.dropbox.util.DropboxResultCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class WireTapLogDropbox implements Processor {

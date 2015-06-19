@@ -1,14 +1,14 @@
 package at.tu.wmpm.processor;
 
 import org.apache.camel.Exchange;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
 /**
  * 
  * @author Christian
  *
  */
-@Configuration
+@Service
 public class FileProcessor {
 
     public void process(Exchange exchange) throws Exception {

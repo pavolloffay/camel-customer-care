@@ -1,20 +1,16 @@
 package at.tu.wmpm.processor;
 
-import java.util.ArrayList;
-
-import org.apache.camel.Exchange;
-import org.apache.camel.Message;
-import org.apache.camel.Processor;
-import org.apache.camel.impl.DefaultMessage;
-import org.apache.commons.lang.builder.ReflectionToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Service;
-
 import at.tu.wmpm.model.Comment;
 import at.tu.wmpm.model.FacebookBusinessCase;
 import facebook4j.Post;
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.camel.impl.DefaultMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 /**
  * Created by pavol on 8.5.2015.
@@ -29,7 +25,7 @@ import facebook4j.Post;
  * https://www.facebook.com/area51customercare
  *
  **/
-@Configuration
+@Service
 public class FacebookProcessor {
 
     private static final Logger log = LoggerFactory
