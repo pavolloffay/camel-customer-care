@@ -1,10 +1,11 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.processor.EmployeeFacebookSimulationProcessor;
-import at.tu.wmpm.processor.EmployeeMailSimulationProcessor;
-import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.LoggingLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import at.tu.wmpm.processor.EmployeeFacebookSimulationProcessor;
+import at.tu.wmpm.processor.EmployeeMailSimulationProcessor;
 
 /**
  * Simulation for the employee
@@ -39,6 +40,7 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
                 .to("facebook://commentPost?postId="
                         + header("CamelFacebook.postId") + "&" + "message="
                         + header("CamelFacebook.message"))
+                .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Facebook-request was answered")
                 .end();
 
         /**
@@ -55,6 +57,7 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
                 .to("facebook://commentPost?postId="
                         + header("CamelFacebook.postId") + "&" + "message="
                         + header("CamelFacebook.message"))
+                 .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Facebook-request was answered and closed")
                 .end();
 
         /**
@@ -76,6 +79,7 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
                         "answerMailBusinessCase")
                 .wireTap("direct:updateMailBusinessCaseMongo")
                 .to("smtps://{{mail.smtp.address}}:{{mail.smtp.port}}?password={{mail.password}}&username={{mail.userName}}")
+                .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Mail-request was answered and closed")
                 .end();
 
         /**

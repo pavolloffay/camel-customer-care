@@ -1,12 +1,9 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.CalendarProcessor;
-import at.tu.wmpm.processor.TwitterProcessor;
-import at.tu.wmpm.processor.WireTapLogDropbox;
-import at.tu.wmpm.processor.WireTapLogTwitter;
+import javax.xml.bind.JAXBContext;
+
 import org.apache.camel.Exchange;
-import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.CalendarProcessor;
+import at.tu.wmpm.processor.TwitterProcessor;
+import at.tu.wmpm.processor.WireTapLogDropbox;
+import at.tu.wmpm.processor.WireTapLogTwitter;
 
 /**
  * Created by pavol on 8.6.2015.
@@ -46,6 +47,7 @@ public class TwitterRoute extends CustomRouteBuilder {
         from("twitter://timeline/home?type=polling&delay=60&consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
+                 .to("log:at.tu.wmpm.model.BusinessCase?level=INFO")
                 .wireTap("direct:logTwitter", wiretapTwitter)
                 .bean(TwitterProcessor.class, "process")
                 .multicast()
@@ -61,6 +63,7 @@ public class TwitterRoute extends CustomRouteBuilder {
                         simple("dropbox://put?"
                                 + DROPBOX_AUTH_PARAMETERS
                                 + "&uploadMode=add&localPath=logs/XMLExports/twitter_ex.xml&remotePath=/XMLExports/Twitter_${date:now:yyyyMMdd_HH-mm-SS}.xml"))
+                .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Twitter message was converted and uploaded to Dropbox")
                 .wireTap("seda:logDropbox", wiretapDropbox);
 
         from("direct:logTwitter")

@@ -1,10 +1,9 @@
 package at.tu.wmpm.route;
 
-import at.tu.wmpm.filter.SpamFilter;
-import at.tu.wmpm.model.BusinessCase;
-import at.tu.wmpm.processor.*;
+import javax.xml.bind.JAXBContext;
+
 import org.apache.camel.Exchange;
-import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.converter.jaxb.JaxbDataFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
+import at.tu.wmpm.filter.SpamFilter;
+import at.tu.wmpm.model.BusinessCase;
+import at.tu.wmpm.processor.AutoReplyHeadersProcessor;
+import at.tu.wmpm.processor.CalendarProcessor;
+import at.tu.wmpm.processor.MailProcessor;
+import at.tu.wmpm.processor.MailUpdateCommentsProcessor;
+import at.tu.wmpm.processor.WireTapLogMail;
 
 /**
  * Created by pavol on 8.6.2015.
@@ -48,6 +53,7 @@ public class MailRoute extends CustomRouteBuilder {
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
         from("pop3s://{{mail.userName}}@{{mail.pop.address}}:{{mail.pop.port}}?password={{mail.password}}")
+                .to("log:at.tu.wmpm.model.BusinessCase?level=INFO")
                 .wireTap("seda:logMail", wiretapMail)
                 .bean(mailProcessor, "process")
                 .filter()
@@ -88,6 +94,7 @@ public class MailRoute extends CustomRouteBuilder {
                 .recipientList(
                         simple("dropbox://put?"
                                 + DROPBOX_AUTH_PARAMETERS
-                                + "&uploadMode=add&localPath=logs/XMLExports/ex1.xml&remotePath=/XMLExports/M_${date:now:yyyyMMdd_HH-mm-SS}.xml"));
+                                + "&uploadMode=add&localPath=logs/XMLExports/ex1.xml&remotePath=/XMLExports/M_${date:now:yyyyMMdd_HH-mm-SS}.xml"))
+                .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Mail was converted and uploaded to Dropbox");
     }
 }
