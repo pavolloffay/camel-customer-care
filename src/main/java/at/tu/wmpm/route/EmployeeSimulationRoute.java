@@ -42,6 +42,8 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=findAll")
                 .bean(employeeTwitterSimulationProcessor,
                         "commentOnTwitterBusinessCase")
+                // .setBody(header("CamelTwitter.message"))
+               // .setHeader("CamelTwitter.message", header("CamelTwitter.message"))
                 .to("twitter://timeline/user?consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
@@ -86,6 +88,32 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
          */
         from("direct:updateBusinessCaseMongo")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=save")
+                .end();
+
+        /**
+         * An employee closes a Twitter ticket (open
+         * TwitterBusinessCase), every 55 seconds (includes leaving a comment)
+         */
+        from("quartz2://employeeGroup/closeTwitterTimer?cron=0/15+*+*+*+*+?")
+                .setBody()
+                .constant("{ \"status\": \"OPEN\" }")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=findAll")
+                .bean(employeeTwitterSimulationProcessor,
+                        "closeTwitterBusinessCase")
+                .wireTap("direct:updateTwitterBusinessCaseMongo")
+                //.setHeader("CamelTwitter.output", header("CamelTwitter.message"))
+                .to("twitter://timeline/user?consumerKey={{twitter.consumer.key}}&"
+                        + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
+                        + "accessTokenSecret={{twitter.access.token.secret}}")
+                 .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Twitter-request was answered and closed")
+                .end();
+
+        /**
+         * Updates the TwitterBusinessCase in the mongoDB
+         */
+        from("direct:updateTwitterBusinessCaseMongo")
+                .setBody(header("bc"))
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=save")
                 .end();
 
         /**

@@ -24,10 +24,7 @@ public class EmployeeTwitterSimulationProcessor {
             .getLogger(EmployeeTwitterSimulationProcessor.class);
 
     public void commentOnTwitterBusinessCase(Exchange e) throws Exception {
-        String tweetMessage = "Reply Test only 140 char";
-
-        String body = e.getIn().getBody(String.class);
-        // e.setOut(tweets);
+        String tweetMessage = "We are working on your ticket!";
 
         Message m = addComment(e, tweetMessage);
 
@@ -35,16 +32,12 @@ public class EmployeeTwitterSimulationProcessor {
             throw new TwitterException(
                     "An error occured while processing business cases from mongoDB.");
         }
-
-        // e.getOut().setBody(m.getHeader(name));
-        // change the message to say Hello
-
-        e.getOut().setBody("@" + m.getHeader("CamelTwitter.message"));
+        e.getOut().setBody(m.getHeader("CamelTwitter.message"));
 
     }
 
-    public void closeTwitterkBusinessCase(Exchange e) throws Exception {
-        String tweetMessage = "Your ticket was successfully processed and is being closed now. Thank you for your patience.";
+    public void closeTwitterBusinessCase(Exchange e) throws Exception {
+        String tweetMessage = "Your ticket is now closed!";
         Message m = addComment(e, tweetMessage);
         TwitterBusinessCase tbc = null;
 
@@ -56,6 +49,8 @@ public class EmployeeTwitterSimulationProcessor {
         } else
             throw new TwitterException(
                     "An error occured while processing business cases from mongoDB.");
+
+        e.getOut().setBody(m.getHeader("CamelTwitter.message"));
     }
 
     public Message addComment(Exchange e, String message) throws Exception {
@@ -102,12 +97,12 @@ public class EmployeeTwitterSimulationProcessor {
                         if (chosenBusinessCase.getScreenName() == null) {
                             tweetMessage = "Dear "
                                     + chosenBusinessCase.getSender()
-                                    + "\n We are working on it!"
+                                    + "\n " + message + " ID: " + chosenBusinessCase.getId().substring(0, 3)
                                     + "\n Your IT-Team";
                         } else {
                             tweetMessage = " Dear @"
                                     + chosenBusinessCase.getScreenName()
-                                    + "\n We are working on it!"
+                                    + "\n " + message + " ID: " + chosenBusinessCase.getId().substring(0, 3)
                                     + "\n Your IT-Team";
                         }
                         log.info(tweetMessage);

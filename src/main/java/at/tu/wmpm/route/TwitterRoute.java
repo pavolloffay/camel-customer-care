@@ -44,7 +44,7 @@ public class TwitterRoute extends CustomRouteBuilder {
         JAXBContext jaxbContext = JAXBContext.newInstance(BusinessCase.class);
         JaxbDataFormat jaxbFormat = new JaxbDataFormat(jaxbContext);
 
-        from("twitter://timeline/home?type=polling&delay=60&consumerKey={{twitter.consumer.key}}&"
+        from("twitter://timeline/home?type=polling&delay=900&consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
                  .to("log:at.tu.wmpm.model.BusinessCase?level=INFO")
