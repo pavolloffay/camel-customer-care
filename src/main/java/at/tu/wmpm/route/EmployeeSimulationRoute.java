@@ -34,16 +34,15 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
 
         /**
          * An employee answers to a TwitterBusinessCase
-         * every 45 seconds
+         * after 30 seconds for preventing blocking by Twitter
          */
-        from("quartz2://employeeGroup/commentTwitterTimer?cron=0/45+*+*+*+*+?")
+        from("timer://runOnce?repeatCount=1&delay=30000")
+               // + "quartz2://employeeGroup/commentTwitterTimer?cron=0/30+*+*+*+*+?")
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=findAll")
                 .bean(employeeTwitterSimulationProcessor,
                         "commentOnTwitterBusinessCase")
-                // .setBody(header("CamelTwitter.message"))
-               // .setHeader("CamelTwitter.message", header("CamelTwitter.message"))
                 .to("twitter://timeline/user?consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
@@ -70,7 +69,7 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
          * An employee closes a Facebook ticket (aka Facebook post or open
          * FacebookBusinessCase), every 55 seconds (includes leaving a comment)
          */
-        from("quartz2://employeeGroup/closeFacebookTimer?cron=0/15+*+*+*+*+?")
+        from("quartz2://employeeGroup/closeFacebookTimer?cron=0/55+*+*+*+*+?")
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.facebookBcCollection}}&operation=findAll")
@@ -91,17 +90,17 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
                 .end();
 
         /**
-         * An employee closes a Twitter ticket (open
-         * TwitterBusinessCase), every 55 seconds (includes leaving a comment)
+         * An employee closes a Twitter ticket (only open
+         * TwitterBusinessCase), after 50 seconds (includes leaving a comment)
          */
-        from("quartz2://employeeGroup/closeTwitterTimer?cron=0/15+*+*+*+*+?")
+        from("timer://runOnce?repeatCount=1&delay=50000")
+                //"quartz2://employeeGroup/closeTwitterTimer?cron=0/55+*+*+*+*+?")
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=findAll")
                 .bean(employeeTwitterSimulationProcessor,
                         "closeTwitterBusinessCase")
                 .wireTap("direct:updateTwitterBusinessCaseMongo")
-                //.setHeader("CamelTwitter.output", header("CamelTwitter.message"))
                 .to("twitter://timeline/user?consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
