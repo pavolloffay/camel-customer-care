@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import at.tu.wmpm.processor.EmployeeFacebookSimulationProcessor;
 import at.tu.wmpm.processor.EmployeeMailSimulationProcessor;
+import at.tu.wmpm.processor.EmployeeTwitterSimulationProcessor;
 
 /**
  * Simulation for the employee
@@ -20,12 +21,32 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
     private EmployeeFacebookSimulationProcessor employeeFacebookSimulationProcessor;
     @Autowired
     private EmployeeMailSimulationProcessor employeeMailSimulationProcessor;
+    @Autowired
+    private EmployeeTwitterSimulationProcessor employeeTwitterSimulationProcessor;
 
 
     @Override
     @SuppressWarnings("deprecation")
     public void configure() throws Exception {
         super.configure();
+
+
+
+        /**
+         * An employee answers to a TwitterBusinessCase
+         * every 45 seconds
+         */
+        from("quartz2://employeeGroup/commentTwitterTimer?cron=0/45+*+*+*+*+?")
+                .setBody()
+                .constant("{ \"status\": \"OPEN\" }")
+                .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=findAll")
+                .bean(employeeTwitterSimulationProcessor,
+                        "commentOnTwitterBusinessCase")
+                .to("twitter://timeline/user?consumerKey={{twitter.consumer.key}}&"
+                        + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
+                        + "accessTokenSecret={{twitter.access.token.secret}}")
+                .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Twitter-request was answered")
+                .end();
 
         /**
          * An employee answers (aka adds comment) to a FacebookBusinessCase
