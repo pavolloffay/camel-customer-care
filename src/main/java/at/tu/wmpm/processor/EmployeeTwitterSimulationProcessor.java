@@ -20,25 +20,26 @@ import com.mongodb.DBObject;
 @Service
 public class EmployeeTwitterSimulationProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(EmployeeTwitterSimulationProcessor.class);
-
+    private static final Logger log = LoggerFactory
+            .getLogger(EmployeeTwitterSimulationProcessor.class);
 
     public void commentOnTwitterBusinessCase(Exchange e) throws Exception {
         String tweetMessage = "Reply Test only 140 char";
 
         String body = e.getIn().getBody(String.class);
-       // e.setOut(tweets);
+        // e.setOut(tweets);
 
         Message m = addComment(e, tweetMessage);
 
         if (null == m) {
-            throw new TwitterException("An error occured while processing business cases from mongoDB.");
+            throw new TwitterException(
+                    "An error occured while processing business cases from mongoDB.");
         }
 
-        //e.getOut().setBody(m.getHeader(name));
+        // e.getOut().setBody(m.getHeader(name));
         // change the message to say Hello
 
-        e.getOut().setBody("@"+m.getHeader("CamelTwitter.message"));
+        e.getOut().setBody("@" + m.getHeader("CamelTwitter.message"));
 
     }
 
@@ -53,7 +54,8 @@ public class EmployeeTwitterSimulationProcessor {
             m.setHeader("bc", tbc);
             m.setBody(tbc);
         } else
-            throw new TwitterException("An error occured while processing business cases from mongoDB.");
+            throw new TwitterException(
+                    "An error occured while processing business cases from mongoDB.");
     }
 
     public Message addComment(Exchange e, String message) throws Exception {
@@ -87,7 +89,8 @@ public class EmployeeTwitterSimulationProcessor {
             businessCaseList = generateTwitterBusinessCases(DBObjectList);
 
             if (null != businessCaseList) {
-                log.info("Got " + businessCaseList.size() + " open business cases");
+                log.info("Got " + businessCaseList.size()
+                        + " open business cases");
 
                 if (!businessCaseList.isEmpty()) {
                     chosenBusinessCase = businessCaseList.get(random
@@ -96,13 +99,17 @@ public class EmployeeTwitterSimulationProcessor {
                             + chosenBusinessCase.getId());
 
                     if (chosenBusinessCase.getTweetID() != 0) {
-                      /*  tweetMessage = "Dear " + chosenBusinessCase.getSender()
-                                + "\n" + message + "\n\n" + "Yours sincerely,"
-                                + "\n" + "The IT Crowd";
-                               */
-                        tweetMessage = chosenBusinessCase.getScreenName() + " Dear User!"
-                                + "\n We are working on it!"
-                                + "\n Your IT-Team";
+                        if (chosenBusinessCase.getScreenName() == null) {
+                            tweetMessage = "Dear "
+                                    + chosenBusinessCase.getSender()
+                                    + "\n We are working on it!"
+                                    + "\n Your IT-Team";
+                        } else {
+                            tweetMessage = " Dear @"
+                                    + chosenBusinessCase.getScreenName()
+                                    + "\n We are working on it!"
+                                    + "\n Your IT-Team";
+                        }
                         log.info(tweetMessage);
 
                         m = e.getOut();
