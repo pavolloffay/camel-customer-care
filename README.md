@@ -1,4 +1,6 @@
-## Customer care center
+# camel-customer-care
+
+188.924 Workflow Modeling and Process Management - Project
 
 Simple ticketing system integrated with Facebook, Twitter, Dropbox...
 
