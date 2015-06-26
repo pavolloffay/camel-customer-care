@@ -31,17 +31,7 @@ public abstract class BusinessCase {
     private String sender;
     private String incomingDate;
     private BusinessCaseStatus status;
-    @JsonIgnore
-    private boolean isNew;
     private ArrayList<Comment> comments;
-
-    public boolean isNew() {
-        return isNew;
-    }
-
-    public void setNew(boolean isNew) {
-        this.isNew = isNew;
-    }
 
     public String getSubject() {
         return subject;

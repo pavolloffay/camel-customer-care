@@ -60,7 +60,6 @@ public class MailProcessor {
         mailBusinessCase.setSender(headers.get("Return-Path").toString());
         mailBusinessCase.setSubject(headers.get("Subject").toString());
         mailBusinessCase.setIncomingDate(headers.get("Date").toString());
-        mailBusinessCase.setNew(true);
 
         return mailBusinessCase;
     }
