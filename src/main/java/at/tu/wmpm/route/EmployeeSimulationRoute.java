@@ -36,14 +36,13 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
          * An employee answers to a TwitterBusinessCase
          * after 30 seconds for preventing blocking by Twitter
          */
-        from("timer://runOnce?repeatCount=1&delay=30000")
-               // + "quartz2://employeeGroup/commentTwitterTimer?cron=0/30+*+*+*+*+?")
+        from("quartz2://employeeGroup/commentTwitterTimer?cron=0/30+*+*+*+*+?")
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=findAll")
                 .bean(employeeTwitterSimulationProcessor,
                         "commentOnTwitterBusinessCase")
-                .to("twitter://timeline/user?consumerKey={{twitter.consumer.key}}&"
+                .to("twitter://directmessage?user=CC_TUWIEN&consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
                 .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Twitter-request was answered")
@@ -93,15 +92,14 @@ public class EmployeeSimulationRoute extends CustomRouteBuilder {
          * An employee closes a Twitter ticket (only open
          * TwitterBusinessCase), after 50 seconds (includes leaving a comment)
          */
-        from("timer://runOnce?repeatCount=1&delay=50000")
-                //"quartz2://employeeGroup/closeTwitterTimer?cron=0/55+*+*+*+*+?")
+        from("quartz2://employeeGroup/closeTwitterTimer?cron=0/55+*+*+*+*+?")
                 .setBody()
                 .constant("{ \"status\": \"OPEN\" }")
                 .to("mongodb:mongo?database={{mongodb.database}}&collection={{mongodb.twitterBcCollection}}&operation=findAll")
                 .bean(employeeTwitterSimulationProcessor,
                         "closeTwitterBusinessCase")
                 .wireTap("direct:updateTwitterBusinessCaseMongo")
-                .to("twitter://timeline/user?consumerKey={{twitter.consumer.key}}&"
+                .to("twitter://directmessage?user=CC_TUWIEN&consumerKey={{twitter.consumer.key}}&"
                         + "consumerSecret={{twitter.consumer.secret}}&accessToken={{twitter.access.token}}&"
                         + "accessTokenSecret={{twitter.access.token.secret}}")
                  .log(LoggingLevel.INFO, org.slf4j.LoggerFactory.getLogger("CustomRouteBuilder.class"), "Twitter-request was answered and closed")
