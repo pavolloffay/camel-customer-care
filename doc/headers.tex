@@ -1,0 +1,102 @@
+\documentclass[a4paper]{article}
+
+\usepackage{tabu}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[margin=3cm]{geometry}
+\usepackage{graphicx}
+\usepackage{acronym}
+\usepackage{marvosym} % Special symbols (e.g. \Letter, \Telefon, \Email)
+\usepackage{blindtext} % Very good package for sample text, language specific (use e.g. \usepackage[ngerman]{babel} before). Way better than the lipsum package (for examples see: http://ctan.mirrorcatalogs.com/macros/latex/contrib/blindtext/blindtext.pdf)
+\usepackage{caption} % Better captioning (e.g. when clicking on Link to figure, the whole figure is viewable, not only the description)
+\usepackage{listings} % Code listings
+\usepackage{color} % Use of colors
+\usepackage{eurosym}
+\usepackage{float}
+\usepackage{comment}
+\usepackage{booktabs}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{pdflscape}
+
+% Project specific stuff
+\usepackage{fancyvrb}
+\usepackage[nottoc]{tocbibind} % Get bibliography, LOF, LOT and LOL into TOC (Without numbers!). From http://tex.stackexchange.com/questions/71129/bibliography-in-table-of-contents
+%\usepackage[nottoc,numbib]{tocbibind} % Bibliography with number  in TOC. See http://tex.stackexchange.com/questions/8458/making-the-bibliography-appear-in-the-table-of-contents
+% tocbibind general usage: ftp://ftp.tex.ac.uk/tex-archive/macros/latex/contrib/tocbibind/tocbibind.pdf
+
+\usepackage{newclude} % removes some restrictions from \include (e.g. pagebreak before and after \include). Details: http://ctan.mackichan.com/macros/latex/contrib/frankenstein/newclude.pdf
+
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\definecolor{mybeige}{RGB}{255,213,122}
+
+\lstset{ %
+    backgroundcolor=\color{mybeige},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+    basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+    breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+    breaklines=true,                 % sets automatic line breaking
+    captionpos=b,                    % sets the caption-position to bottom
+    commentstyle=\color{mygreen},    % comment style
+    deletekeywords={...},            % if you want to delete keywords from the given language
+    escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+    extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+    frame=single,                    % adds a frame around the code
+    keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+    keywordstyle=\color{black},      % keyword style
+    language=Octave,                 % the language of the code
+    morekeywords={*,...},            % if you want to add more keywords to the set
+    numbers=none,                    % where to put the line-numbers; possible values are (none, left, right)
+    numbersep=5pt,                   % how far the line-numbers are from the code
+    numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+    rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+    showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+    showstringspaces=false,          % underline spaces within strings only
+    showtabs=false,                  % show tabs within strings adding particular underscores
+    stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
+    stringstyle=\color{mymauve},     % string literal style
+    tabsize=2,                       % sets default tabsize to 2 spaces
+    title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+% Variables
+\newcommand{\titlepageFile}{./titlepage/titlepage-english}
+\newcommand{\referencesFile}{./references}
+\newcommand{\templateSection}{./sections/template-section}
+\newcommand{\exOneSection}{./sections/ex1}
+\newcommand{\exTwoSection}{./sections/ex2}
+\newcommand{\exThreeSection}{./sections/ex3}
+\newcommand{\exFourSection}{./sections/ex4}
+
+% For efficient document generation. Details: http://www.weinelt.de/latex/includeonly.html
+\includeonly{
+    \titlepageFile,
+    \templateSection/template,
+    \exOneSection/ex1,
+    \exTwoSection/ex2,
+    \exThreeSection/ex3,
+    \exFourSection/ex4}
+
+% Packages that should be at the end of the preamble
+
+\usepackage[
+    backend=bibtex,
+    style=authoryear,
+    sortlocale=en_EN,
+    natbib=true,
+    url=true, 
+    doi=true,
+    eprint=false
+]{biblatex}
+
+\usepackage[autostyle]{csquotes}
+\addbibresource{\referencesFile}
+
+\usepackage[ % Clickable references
+	pdfstartview={FitV},
+	pdftitle={CSS SS2015 Assignment 1 -- Group 25},
+	pdfauthor={},
+	pdfsubject={Compuational Social Simulation},
+	colorlinks=false
+]{hyperref}

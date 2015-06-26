@@ -1,0 +1,70 @@
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+% % % % % % % % % % % English titlepage.tex % % % % % % % % % % %
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+
+% Preconditions (e.g. in headers.tex)
+% > Packages:   \usepackage{marvosym}
+% > headers:    \input{headers-titlepage-common}
+%               \input{headers-titlepage-english}
+
+\begin{titlepage}
+	\begin{center}
+		% TU Logo
+		\includegraphics[scale=0.9]{titlepage/media/tu-signet.png}
+		\vspace*{\fill}
+		
+		% Project type
+		{\LARGE \bfseries \prtypeENG}
+		\vspace*{1cm}
+		
+		% Title
+		{\Huge \bfseries \prsubjectENG}
+		\vspace*{0.5cm}
+		
+		% Title description
+		{\Large \prdescriptionENG}
+		\vspace*{1cm}
+		
+		% LVA filler
+		{\large \lvafilltextENG}
+		\vspace*{\fill}
+		
+		% LVA title -- LVA number
+		{\Large \lva~--~\lvanr}
+		\vspace*{\fill}
+		
+		% Advisor filler
+		{\large \advisorfilltextENG}
+		\vspace*{\fill}
+		
+		% Advisor name and email
+		{\Large \advisor}\\
+		{\normalsize \Letter~\href{mailto:\advisoremail}{\advisoremail}}
+		\vspace*{\fill}
+		
+		% Student filler
+		{\Large \studentfilltextENG}
+		%\vspace*{\fill}
+		
+		% Students
+		\begin{center}
+		    \begin{tabular}{ll}
+                \Large \studentAmatr    &   \Large \studentAname\\
+    			                        &   \specialcell{l}{\Letter~\href{mailto:\studentAmail}{\studentAmail}\\~}\\
+                \Large \studentBmatr    &   \Large \studentBname\\
+    			                        &   \specialcell{l}{\Letter~\href{mailto:\studentBmail}{\studentBmail}\\~}\\
+                \Large \studentCmatr    &   \Large \studentCname\\
+    			                        &   \specialcell{l}{\Letter~\href{mailto:\studentCmail}{\studentCmail}\\~}\\
+                \Large \studentDmatr    &   \Large \studentDname\\
+    			                        &   \specialcell{l}{\Letter~\href{mailto:\studentDmail}{\studentDmail}\\~}\\
+    			\Large \studentEmatr    &   \Large \studentEname\\
+    			                        &   \specialcell{l}{\Letter~\href{mailto:\studentEmail}{\studentEmail}\\~}
+    		\end{tabular}
+		\end{center}	
+		\vspace*{\fill}
+		
+		% City and date
+		{\large \datefilltextENG~\today}
+		
+	\end{center}
+\end{titlepage}

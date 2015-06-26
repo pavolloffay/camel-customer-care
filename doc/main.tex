@@ -1,0 +1,151 @@
+% Headers
+\input{headers}
+\input{./titlepage/headers-titlepage-common}
+\input{./titlepage/headers-titlepage-english}
+
+% Begin of document
+\begin{document}
+
+% English titlepage
+\include{\titlepageFile}
+
+% TOC
+\tableofcontents
+\newpage
+
+% Sections
+\section{Project description\label{sec:proddesc}}
+The goal of this project will be the creation of a program which manages customer requests from different sources. Customers can contact the customer care center via e-mail, Facebook or Twitter. The program automatically polls requests from these sources. Incoming requests are enriched (e.g. with a unique ID) and passed to an agent who processes the request. The customer also immediately receives a confirmation message indicating the customer care center received the request. All requests are logged and there is also a backup process which translates the requests to XML format and syncs it with a Dropbox account. The different EIPs, components and their purposes will be described later on.
+
+\subsection{Features}
+\begin{itemize}
+    \item receive user ticket requests via different channels (email, Facebook, Twitter)
+    \item route ticket requests to different positions (agent, calendar)
+    \item append messages to existing tickets
+    \item filter spam mails
+    \item reply to messages
+    \item convert logs to XML and backup via a Dropbox account
+\end{itemize}
+
+\subsubsection{EIPs}
+\begin{enumerate}
+    \item Content Based Router -- Distinguish between message channels (email, Facebook, Twitter)
+    \item Message Filter -- will be used to filter spam (based on a blacklist)
+    \item Aggregator -- if a ticket is closed the aggregator is used to combine all messages and save them in the database
+    \item Splitter -- will be used to separate facebook posts (as they are grouped via polling)
+    \item Wire Tap -- will be used to log incoming requests and forward requests to employees at the same time
+    \item Message Translator -- will be used to translate requests into a XML format
+    \item File Transfer -- take the translated XML-Backup and sync it with a Dropbox account
+    \item Logging EIP -- will be used for logging purposes (see wire tap)
+    \item Content Enricher -- get Ticket IDs from existing business cases
+    \item Seda Queue -- will be used for syncing Twitter tweets
+    \item Polling -- will be used to get emails, facebook-posts
+\end{enumerate}
+
+\subsubsection{Components (incl. Beans/Processors)}
+\begin{enumerate}
+    \item Dropbox -- will be used to store backups of the requests (in XML format)
+    \item Google calendar -- will be used to store appointments of customer care center employees with customers
+    \item Database + camel-mongodb -- will be used to save all exchanged messages with a timestamp
+    \item Facebook -- company has a facebook profile which can be used by customers to contact the company
+    \item Twitter -- company also has a twitter profile which customers can use to post requests
+    \item camel-mail -- besides facebook and twitter customers can also contact the company by mail
+    \item camel-velocity -- this component will be used to create auto response templates (e.g. for the response that the request entered the customer care center)
+\end{enumerate}
+
+\newpage
+\section{Graphical Process Model}
+%\begin{lstlisting}
+%The proposal has to contain a graphical process model (BPMN 2.0).
+%\end{lstlisting}
+\begin{figure}[ht!]
+	\centering \includegraphics[width=1.00\linewidth]{./media/BPMN-2-0.pdf}
+	\caption{BPMN 2.0 Model}
+	\label{fig:bpmn}
+\end{figure}
+
+\subsection{Description of the graphical process model}
+The user can send requests to our helpdesk via Facebook, email or Twitter. Depending on the input channel, a content based router decides which path in the further process the request takes. E-Mails are divided in three categories
+\begin{enumerate}
+\item New requests: A new business case is opened, an auto-reply with the new ticket-id will be generated and returned to the customer. 
+\item New mails for an existing ticket (where the subject contains a ticket-id): If there is an open business case with this ticket number the message will be added to it.
+\item Spam (will be filtered, deleted and logged)
+\end{enumerate}
+In case of a Twitter-request it will be checked if it is a reply to an existing Tweet. In this case the new tweet will be added to the existing business case. Otherwise a new business case will be opened.
+
+For Facebook posts it works similar to Twitter with the only difference that Facebook posts are split (since they are polled). 
+
+The business cases are then saved to a Google calendar (to schedule customer appointments). 
+Employees can add messages to business cases and forward them to customers.
+
+On a weekly basis the logs are converted to XML files and saved to a Dropbox folder (as a backup).
+
+\section{Architecture}
+\begin{itemize}
+    \item Application concentrated on business logic
+    \item Use of a MongoDB
+    \item Apache Camel for message routing
+    \item Dependancy Managment (Maven)
+\end{itemize}
+
+\section{Cost estimation\label{sec:costest}}
+
+\begin{table}[H]
+\caption{Cost estimation}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llll@{}}   % |l|c|c|}
+\toprule
+\multicolumn{1}{c}{\textbf{Cost estimation}}           & \textbf{\%}                          & \textbf{hours/member} \\ \toprule
+Management (meetings, documents, records, documentation) & 20                                   & 10                    \\ 
+Requirement specification                                & 5                                    & 2,5                   \\ 
+Design                                                   & 10                                   & 5                    \\ 
+Coding                                                   & 30                                   & 15                    \\ 
+Testing                                 & 10                                   & 5                    \\ 
+System- and Integrationtests                             & 15                                   & 7,5                  \\ 
+Overhead(error handling, bug fixing, riskmanagement)     & 10                                   & 5                    \\ \midrule
+\textbf{Sum hours/member}                                & \multicolumn{1}{l}{\textbf{100 \%}} & \textbf{50}          \\ 
+\textbf{Sum overall hours}                               & \multicolumn{1}{l}{}                & \textbf{250}          \\ 
+\textbf{Estimated overall costs}                         & \multicolumn{1}{l}{}                & \textbf{20.000 \euro}       \\ \bottomrule
+\end{tabular}
+}
+\end{table}
+\begin{table}[h]
+\begin{tabular}{ll}
+Teammembers: & 5  \\
+Wage/hour:    & 80 \euro
+\end{tabular}
+\end{table}
+
+\section{Risks\label{sec:risks}}
+Based on our projects domain, the following risks may arise during the development process:
+\begin{itemize}
+	\item Absence/loss of a team member (e.g. because of illness)
+    \\\textbf{Countermeasures:} Depending on progress and state of the project, either other team members will take over responsibilities or the project scope will have to be reduced, if an agreement can be found with the course administration.
+
+	\item Bad decisions regarding software architecture and choice of technologies
+	\\\textbf{Countermeasures:} Extensive discussions about the selection of technologies, tools and components. Careful planning of software architecture.
+	
+	\item Lack of Quality (e.g. crashes, error messages)
+	\\\textbf{Countermeasures:} Regular, extensive, automated testing.
+	
+	\item Inaccurate estimation of effort
+	\\\textbf{Countermeasures:} If a tasks or feature appears to require drastically more work than initially estimated, the workload will have to be shared with fellow team members.
+\end{itemize}
+
+% LOF, LOT, LOL, LOA
+\newpage
+\listoffigures
+\listoftables
+%\listoflistings
+
+%\section*{List of Acronyms}
+%    \begin{acronym}
+%        \acro{XML}{Extensible Mark-up Language}
+%    \end{acronym}
+%\newpage
+
+% Bibliography
+%\printbibliography[heading=bibintoc]
+
+% End of document
+\end{document}
