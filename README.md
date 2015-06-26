@@ -1,6 +1,6 @@
 # camel-customer-care
 
-188.924 Workflow Modeling and Process Management - Project
+Project for 188.924 Workflow Modeling and Process Management TU Wien
 
 Simple ticketing system integrated with Facebook, Twitter, Dropbox...
 
@@ -18,7 +18,7 @@ Application demonstrates usage of multiple Apache Camel EIP & Components
 
 ### Email & Facebook & Dropbox & Twitter accounts
 * customer.care.tu.wien@gmail.com
-* pass: customerCare123
+* pass: 
 
 ### Twitter specific
 * username: CC_TUWIEN
